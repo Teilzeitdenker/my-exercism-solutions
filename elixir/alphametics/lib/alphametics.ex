@@ -19,16 +19,10 @@ defmodule Alphametics do
   def solve(puzzle) do
     parsed = parse(puzzle)
     {full_map, non_zero_set} = place_values_and_non_zero_set(parsed)
-    digits = 0..9 |> Enum.to_list
     num_chars = full_map |> Map.keys |> length
-    all_perms = combinations(digits, num_chars) |> Enum.flat_map(&permutations/1)
-    full_list = full_map |> Enum.to_list
-    solution_perm = all_perms |> Enum.find(&is_solution(&1, full_list, non_zero_set))
-    if solution_perm != nil do
-      full_list |> Enum.map(&elem(&1, 0)) |> Enum.zip(solution_perm) |> Map.new
-    else
-      nil
-    end
+    all_perms = combinations(0..9 |> Enum.to_list, num_chars) |> Enum.flat_map(&permutations/1)
+    sol = all_perms |> Enum.find(&solution?(&1, full_map, non_zero_set))
+    if sol, do: full_map |> Enum.map(&elem(&1, 0)) |> Enum.zip(sol) |> Map.new, else: nil
   end
 
   defp parse(puzzle) do
@@ -57,14 +51,10 @@ defmodule Alphametics do
       |> List.foldl(MapSet.new, &MapSet.put(&2, &1))
     {full_map, non_zero_set}
   end
-  defp is_solution(perm, full_list, non_zero_set) do
-    if full_list |> Enum.map(&elem(&1, 1)) |> Enum.zip(perm) |> Enum.map(&Tuple.product/1) |> Enum.sum == 0 do
+  defp solution?(perm, full_map, non_zero_set) do
+    if full_map |> Enum.map(&elem(&1, 1)) |> Enum.zip(perm) |> Enum.map(&Tuple.product/1) |> Enum.sum == 0 do
       zero_idx = perm |> Enum.find_index(fn x -> x == 0 end)
-      if zero_idx == nil do
-        true
-      else
-        not (non_zero_set |> MapSet.member?(full_list |> Enum.at(zero_idx) |> elem(0)))
-      end
+      if zero_idx, do: not (non_zero_set |> MapSet.member?(full_map |> Enum.at(zero_idx) |> elem(0))), else: true
     else
       false
     end
