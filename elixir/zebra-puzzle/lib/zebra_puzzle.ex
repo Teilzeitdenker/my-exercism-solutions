@@ -88,5 +88,9 @@ defmodule ZebraPuzzle do
   end
 
   defp perms([]), do: [[]]
-  defp perms(list), do: for elem <- list, rest <- perms(list--[elem]), do: [elem|rest]
+  defp perms(list) do
+    for elem <- list, rest <- perms(list--[elem]) do
+      [elem|rest]
+    end
+  end
 end
