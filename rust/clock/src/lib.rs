@@ -1,14 +1,16 @@
+use num_traits::Euclid;
+
 #[derive(Debug)]
 pub struct Clock {
-    minutes: i32,
+    pub minutes: i32,
     pub display: (i32, i32)
 }
 
 impl Clock {
-    const DAY: i32 = 1440;
     pub fn new(hours: i32, minutes: i32) -> Self {
+        let day: i32 = 1440;
         let raw: i32 = hours * 60 + minutes;
-        let good: i32 = (raw % Clock::DAY + Clock::DAY) % Clock::DAY;
+        let good: i32 = Euclid::rem_euclid(&raw, &day);
         Clock { minutes: good, display: (good / 60, good % 60) }
     }
 
