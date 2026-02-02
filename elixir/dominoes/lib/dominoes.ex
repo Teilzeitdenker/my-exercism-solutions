@@ -12,5 +12,5 @@ defmodule Dominoes do
 
   defp get_next_chains(x, xs), do: (for n <- 1 .. length(xs), do: Enum.slide(xs, n - 1, 0)) |> Enum.filter(&does_chain?(&1, x)) |> Enum.map(&do_chain(&1, x))
   defp does_chain?([{a, b} | _], {_, en}), do: (if en == a or en == b, do: true, else: false)
-  defp do_chain([{a, b} | ds], {st, en}), do: if en == a, do: [{st, b} | ds], else: [{st, a} | ds]
+  defp do_chain([{a, b} | ds], {st, en}), do: (if en == a, do: [{st, b} | ds], else: [{st, a} | ds])
 end
