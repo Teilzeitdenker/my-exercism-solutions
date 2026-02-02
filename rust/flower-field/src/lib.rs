@@ -26,10 +26,10 @@ fn get_flower_locations(garden: &[&str]) -> Vec<(i32, i32)> {
 }
 
 fn count_neighbouring_flowers(location: &(i32, i32), flower_locations: &[(i32, i32)]) -> char {
-    let (i, j) = location.clone();
-    let neighbouring_fields = vec![(i-1, j-1), (i-1, j), (i-1, j+1), (i, j-1), (i, j+1), (i+1, j-1), (i+1, j), (i+1, j+1)];
+    let (i, j) = *location;
+    let neighbouring_fields = [(i-1, j-1), (i-1, j), (i-1, j+1), (i, j-1), (i, j+1), (i+1, j-1), (i+1, j), (i+1, j+1)];
     match neighbouring_fields.iter().filter(|&loc| flower_locations.contains(loc)).count() as u8 {
         0 => ' ',
-        n => ('0' as u8 + n) as char
+        n => (b'0' + n) as char
     }
 }
