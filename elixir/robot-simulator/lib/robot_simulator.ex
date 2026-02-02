@@ -1,8 +1,11 @@
 defmodule RobotSimulator do
   defstruct direction: nil, position: nil
   @type direction() :: :north | :east | :south | :west
+  defguard is_direction(direction) when direction in [:north, :south, :east, :west]
   @type position() :: {integer(), integer()}
+  defguard is_position(pos) when is_tuple(pos) and tuple_size(pos) == 2 and is_integer(elem(pos, 0)) and is_integer(elem(pos, 1))
   @type robot() :: %RobotSimulator{direction: direction(), position: position()}
+  defguard is_instruction(str) when str in ["A", "L", "R"]
 
   @doc """
   Create a Robot Simulator given an initial direction and position.
@@ -10,12 +13,11 @@ defmodule RobotSimulator do
   Valid directions are: `:north`, `:east`, `:south`, `:west`
   """
   @spec create(direction, position) :: robot() | {:error, String.t()}
-  def create(direction \\ :north, position \\ {0, 0}) do
-    cond do
-       not Enum.member?([:north , :east , :south , :west], direction)  -> {:error, "invalid direction"}
-       not is_tuple(position) || tuple_size(position) != 2 || not is_integer(elem(position, 0)) || not is_integer(elem(position, 1)) -> {:error, "invalid position"}
-       true -> %RobotSimulator{direction: direction, position: position}
-    end
+  def create(direction \\ :north, position \\ {0, 0})  # header with default values
+  def create(direction, _) when not is_direction(direction), do: {:error, "invalid direction"} # use defined guards in these cases
+  def create(_, position) when not is_position(position), do: {:error, "invalid position"}
+  def create(direction, position) do
+    %RobotSimulator{direction: direction, position: position}
   end
 
   @doc """
@@ -25,14 +27,12 @@ defmodule RobotSimulator do
   """
   @spec simulate(robot, instructions :: String.t()) :: robot() | {:error, String.t()}
   def simulate(robot, instructions) do
-    result =
+    if instructions |> String.codepoints |> Enum.all?(&is_instruction/1) do
       instructions
       |> String.codepoints()
       |> Enum.reduce(robot, &move_one/2)
-    if result == :error do
-      {:error, "invalid instruction"}
     else
-      result
+      {:error, "invalid instruction"}
     end
   end
 
@@ -67,15 +67,10 @@ defmodule RobotSimulator do
   end
 
   defp move_one(letter, robot) do
-    if robot == :error do
-      :error
-    else
-      case letter do
-        "A" -> advance(robot)
-        "L" -> turn_left(robot)
-        "R" -> turn_right(robot)
-        _ -> :error
-      end
+    case letter do
+      "A" -> advance(robot)
+      "L" -> turn_left(robot)
+      "R" -> turn_right(robot)
     end
   end
 
