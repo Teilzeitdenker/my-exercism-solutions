@@ -17,7 +17,7 @@ defmodule Pangram do
   end
 
   @spec letter?(char) :: boolean
-  def letter?(ch) do
+  defp letter?(ch) do
     ch <= ?z && ch >= ?a
   end
 end
