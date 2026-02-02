@@ -1,0 +1,9 @@
+[package]
+edition = "2021"
+name = "two-bucket"
+version = "1.4.0"
+
+[dependencies]
+itertools = "0.12.1"
+strum = "0.26"
+strum_macros = "0.26"
