@@ -3,10 +3,11 @@ module PhoneNumber
 open System
 
 // Railway oriented programming
-let (>>=) twoTrackInput switchFunction = 
-    match twoTrackInput with
-    | Ok s -> switchFunction s
-    | Error e -> Error e
+// can also use Result.bind instead of the custom Haskell-like operator here
+//let (>>=) twoTrackInput switchFunction = 
+//    match twoTrackInput with
+//    | Ok s -> switchFunction s
+//    | Error e -> Error e
 
 // Designing for errors using an ErrorMessage type as payload for the Error case
 type ErrorMessage = 
@@ -25,8 +26,9 @@ let validateInput (input: string) =
     else
         Ok input
 
+// use Result.map for this singleTrackFunction
 let getCleanedList (input: string) =
-    input |> Seq.filter (Char.IsDigit) |> Seq.toList |> Ok
+    input |> Seq.filter (Char.IsDigit) |> Seq.toList
 
 let checkLength (input: char list) = 
     if Seq.length input > 11 then
@@ -78,16 +80,16 @@ let returnMessage result =
         | BadExchangeCode str -> Error (sprintf "exchange code cannot start with %s" str) 
         | ParsingError -> Error "problem when parsing"
 
-let clean input =
-    input 
-    |> validateInput
-    >>= getCleanedList
-    >>= checkLength
-    >>= checkCountryCode
-    >>= checkAreaCode
-    >>= checkExchangeCode
-    >>= tryParse
-    |> returnMessage
+// write this in point-free style
+let clean =
+    validateInput
+    >> Result.map getCleanedList
+    >> Result.bind checkLength
+    >> Result.bind checkCountryCode
+    >> Result.bind checkAreaCode
+    >> Result.bind checkExchangeCode
+    >> Result.bind tryParse
+    >> returnMessage
 
 // Solution with if, elif, else...
 
