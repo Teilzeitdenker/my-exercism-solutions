@@ -21,33 +21,29 @@ public class RestApi
     {
         if (payload == null) return JsonSerializer.Serialize(Array.Empty<string>());
         var wanted = JsonSerializer.Deserialize<UserList>(payload);
-        var res = wanted.users.Select(name => db[name]);
-        return JsonSerializer.Serialize(res);
+        return JsonSerializer.Serialize(wanted.users.Select(name => db[name]));
     }
     public string Post(string url, string payload) => url switch
     {
          "/add" => AddNewUser(JsonSerializer.Deserialize<User>(payload).user),
         _       => AddIOUEntry(JsonSerializer.Deserialize<IOU>(payload))
     };
-    private string AddNewUser(string name)
-    {
-        db[name] = new(name, new(), new());
-        return JsonSerializer.Serialize(db[name]);
-    }
+    private string AddNewUser(string name) =>
+        JsonSerializer.Serialize(db[name] = new(name, new(), new()));
     private string AddIOUEntry(IOU iou)
     {
         if (db[iou.lender].owes.ContainsKey(iou.borrower))
         {
             var restDebt = db[iou.lender].owes[iou.borrower] - iou.amount;
             if (restDebt > 0.0m) OnlyUpdateEntries(iou.lender, iou.borrower, restDebt);
-            else RemoveAndPossiblyAddEntries(iou.lender, iou.borrower, -restDebt);
+            else RemoveAndEvtlAddEntries(iou.lender, iou.borrower, -restDebt);
         } else AddEntries(iou.lender, iou.borrower, iou.amount);
         var response = new[] { db[iou.lender], db[iou.borrower] }.OrderBy(u => u.name);
         return JsonSerializer.Serialize(response);
     }
     private void OnlyUpdateEntries(string lender, string borrower, decimal amount) =>
         (db[lender].owes[borrower], db[borrower].owed_by[lender]) = (amount, amount);
-    private void RemoveAndPossiblyAddEntries(string lender, string borrower, decimal amount)
+    private void RemoveAndEvtlAddEntries(string lender, string borrower, decimal amount)
     {
         db[lender].owes.Remove(borrower);
         db[borrower].owed_by.Remove(lender);
