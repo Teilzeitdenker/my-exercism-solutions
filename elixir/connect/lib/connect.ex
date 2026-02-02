@@ -1,5 +1,4 @@
 defmodule Connect do
-  @offsets [{-1, 0}, {-1, 1}, {0, -1}, {0, 1}, {1, -1}, {1, 0}]
   @doc """
   Calculates the winner (if any) of a b
   using "O" as the white player
@@ -25,7 +24,7 @@ defmodule Connect do
       not(on_board?(b, r, c)) or entry(b, r, c) != stone -> false
       reached_player_goal.(b, r, c)                      -> true
       true                                               ->
-        @offsets |> Enum.any?(fn {dr, dc} ->
+        [{-1, 0},{-1, 1},{0, -1},{0, 1},{1, -1},{1, 0}] |> Enum.any?(fn {dr, dc} ->
           path?(b, r + dr, c + dc, stone, [{r, c}|visited], reached_player_goal)
         end)
     end
