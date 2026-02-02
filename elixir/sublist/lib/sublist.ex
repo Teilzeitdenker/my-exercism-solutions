@@ -6,12 +6,12 @@ defmodule Sublist do
   def compare(a, b) do
     case {a |> length, b |> length} do
       {n, n} -> if a === b, do: :equal, else: :unequal
-      {m, n} when m < n -> if is_sublist_of?(a, b), do: :sublist, else: :unequal
-      {n, m} when m < n -> if is_sublist_of?(b, a), do: :superlist, else: :unequal
+      {m, n} when m < n -> if sublist_of?(a, b), do: :sublist, else: :unequal
+      {n, m} when m < n -> if sublist_of?(b, a), do: :superlist, else: :unequal
     end
   end
 
-  defp is_sublist_of?(a, b) do
+  defp sublist_of?(a, b) do
     if a == [], do: true, else: b |> Stream.chunk_every(length(a), 1, :discard) |> Enum.any?(&(&1 === a))
   end
 end
