@@ -6,6 +6,7 @@ pub fn count(lines: &[&str]) -> u32 {
             let indices = line.char_indices().filter_map(|(i, c)| if c == '+' {Some(i)} else {None}).collect::<Vec<_>>();
             match indices.len() {
                 0 => Vec::new(),
+                1 => Vec::new(),
                 _ => { // this part could possibly be done with the .combinations(2) function in the itertools crate
                     let mut pairs = Vec::with_capacity( (indices.len() * (indices.len() - 1)) / 2);
                     for i in 0..(indices.len() - 1) {
