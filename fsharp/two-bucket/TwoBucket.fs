@@ -1,8 +1,8 @@
 ﻿module TwoBucket
 
 type Bucket = One | Two
-type BucketResult = {Moves: int; GoalBucket: Bucket; OtherBucket: int}
-type Move = | FillOne | FillTwo | EmptyOne | EmptyTwo | PourRight | PourLeft
+type BucketResult = { Moves: int; GoalBucket: Bucket; OtherBucket: int }
+type Move = FillOne | FillTwo | EmptyOne | EmptyTwo | PourRight | PourLeft
 let allMoves = [FillOne; FillTwo; EmptyOne; EmptyTwo; PourRight; PourLeft]
 
 let measure sizeOne sizeTwo goal startBucket =
@@ -16,12 +16,9 @@ let measure sizeOne sizeTwo goal startBucket =
         | EmptyTwo  -> (a, 0)
         | PourLeft  -> (a + min (sizeOne - a) b, b - min (sizeOne - a) b)
         | PourRight -> (a - min (sizeTwo - b) a, b + min (sizeTwo - b) a)
+    let applyAllMoves state = allMoves |> List.map (applyMove state)
     let getNextStates (states, explored) = 
-        match
-            states 
-            |> List.collect (fun st -> allMoves |> List.map (applyMove st) |> List.except explored) 
-            |> List.distinct
-        with 
+        match states |> List.collect (applyAllMoves >> List.except explored) |> List.distinct with 
         | []        -> None 
         | nxtStates -> Some (states, (nxtStates, explored |> List.append nxtStates))
     let allReachableStates = List.unfold getNextStates ([initialState], [forbiddenState])
@@ -30,7 +27,4 @@ let measure sizeOne sizeTwo goal startBucket =
         | (Some (_, other), _) -> Some { Moves = idx + 1; GoalBucket = Bucket.One; OtherBucket = other }
         | (_, Some (other, _)) -> Some { Moves = idx + 1; GoalBucket = Bucket.Two; OtherBucket = other }
         | _                    -> None
-    allReachableStates
-    |> List.indexed 
-    |> List.choose tryBucketResult
-    |> List.head 
+    allReachableStates |> List.indexed |> List.choose tryBucketResult |> List.head 
