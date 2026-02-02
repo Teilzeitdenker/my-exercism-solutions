@@ -1,39 +1,20 @@
-module TwoBucket
+﻿module TwoBucket
 
 type Bucket = One | Two
-
-type BucketResult = {
-    Moves: int 
-    GoalBucket: Bucket 
-    OtherBucket: int }
-
-type State = int * int
-
-type Move = 
-    | FillOne
-    | FillTwo
-    | EmptyOne
-    | EmptyTwo
-    | PourRight
-    | PourLeft
-
+type Move = | FillOne | FillTwo | EmptyOne | EmptyTwo | PourRight | PourLeft
 let allMoves = [FillOne; FillTwo; EmptyOne; EmptyTwo; PourRight; PourLeft]
 
-let measure sizeOne sizeTwo (goal: int) (startBucket: Bucket) =
-    let initialState = if startBucket = Bucket.One then (sizeOne, 0) else (0, sizeTwo)
-    let forbiddenState = if startBucket = Bucket.One then (0, sizeTwo) else (sizeOne, 0)
-    let applyMove ((a, b): State) (move: Move)  = 
+let measure sizeOne sizeTwo goal startBucket =
+    let initialState = if startBucket = One then (sizeOne, 0) else (0, sizeTwo)
+    let forbiddenState = if startBucket = One then (0, sizeTwo) else (sizeOne, 0)
+    let applyMove (a, b) (move: Move)  = 
         match move with
         | FillOne   -> (sizeOne, b) 
         | FillTwo   -> (a, sizeTwo)
         | EmptyOne  -> (0, b)
         | EmptyTwo  -> (a, 0)
-        | PourLeft  -> 
-            let toPour = min (sizeOne - a) b 
-            (a + toPour, b - toPour)
-        | PourRight -> 
-            let toPour = min (sizeTwo - b) a 
-            (a - toPour, b + toPour)
+        | PourLeft  -> (a + min (sizeOne - a) b, b - min (sizeOne - a) b)
+        | PourRight -> (a - min (sizeTwo - b) a, b + min (sizeTwo - b) a)
     let getNextStates (states, explored) = 
         match
             states 
@@ -45,8 +26,8 @@ let measure sizeOne sizeTwo (goal: int) (startBucket: Bucket) =
     let allReachableStates = List.unfold getNextStates ([initialState], [forbiddenState])
     let tryBucketResult (idx, ls) =  
         match (List.tryFind (fst >> (=) goal) ls, List.tryFind (snd >> (=) goal) ls) with 
-        | (Some (_, other), _) -> Some { Moves = idx + 1; GoalBucket = Bucket.One; OtherBucket = other }
-        | (_, Some (other, _)) -> Some { Moves = idx + 1; GoalBucket = Bucket.Two; OtherBucket = other }
+        | (Some (_, other), _) -> Some {| Moves = idx + 1; GoalBucket = Bucket.One; OtherBucket = other |}
+        | (_, Some (other, _)) -> Some {| Moves = idx + 1; GoalBucket = Bucket.Two; OtherBucket = other |}
         | _                    -> None
     allReachableStates
     |> List.indexed 
