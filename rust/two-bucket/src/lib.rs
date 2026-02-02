@@ -1,7 +1,5 @@
-use std::{collections::{VecDeque, HashSet}, hash::Hash};
 use itertools::Itertools;
-use strum::IntoEnumIterator;
-use strum_macros::EnumIter;
+use std::{collections::{VecDeque, HashSet}, hash::Hash};
 
 #[derive(PartialEq, Eq, Debug)]
 pub enum Bucket { One, Two }
@@ -22,7 +20,7 @@ impl BucketStats {
             } else {
                 let next_states = state
                     .apply_all_moves()
-                    .filter(|s| !forbidden_fillings.contains(&s.fillings))
+                    .filter(|st| !forbidden_fillings.contains(&st.fillings))
                     .collect::<Vec<_>>();
                 for s in next_states {
                     forbidden_fillings.insert(s.fillings.clone());
@@ -39,23 +37,25 @@ impl BucketStats {
 #[derive(PartialEq, Eq, Debug, Clone, Hash)]
 struct Fillings(u8, u8);
 
-// Unique trait from itertools needs Clone and Hash to be derived
 #[derive(PartialEq, Eq, Debug, Clone, Hash)]
 struct State { fillings: Fillings, cap1: u8, cap2: u8, moves: u8 }
 
 impl State {
     fn apply_all_moves(&self) -> impl Iterator<Item = State> + '_ {
-        Move::iter() // using strum crate to achieve this
-            .map(|m| m.apply_move(self))
+        Move::VALUES
+            .into_iter()
+            .map(|m| Move::apply_move(&m, self))
             .unique()
     }
 }
 
-// deriving EnumIter trait from strum (not compatible with itertools 0.13)
-#[derive(EnumIter, PartialEq, Eq, Debug)]
+#[derive(PartialEq, Eq, Debug)]
 enum Move { FillOne, FillTwo, EmptyOne, EmptyTwo, PourLeft, PourRight }
 
 impl Move {
+    const VALUES: [Self; 6] = 
+    [Self::FillOne, Self::FillTwo, Self::EmptyOne, Self::EmptyTwo, Self::PourLeft, Self::PourRight];
+    
     fn apply_move(&self, state: &State) -> State {    
         let Fillings(a, b) = state.fillings;
         let pour_lft = b.min(state.cap1 - a);
@@ -74,11 +74,21 @@ impl Move {
     }
 }
 
-pub fn solve(cap1: u8, cap2: u8, goal: u8, start_bucket: &Bucket) -> Option<BucketStats> {
+pub fn solve(capacity_1: u8, capacity_2: u8, goal: u8, start_bucket: &Bucket) -> Option<BucketStats> {
     let mut state_queue = VecDeque::new();
     let mut forbidden_fillings = HashSet::new();
-    let bucket_one_filled = State {fillings: Fillings(cap1, 0), cap1, cap2, moves: 1};
-    let bucket_two_filled = State {fillings: Fillings(0, cap2), cap1, cap2, moves: 1};
+    let bucket_one_filled = State { 
+        fillings: Fillings(capacity_1, 0), 
+        cap1: capacity_1, 
+        cap2: capacity_2, 
+        moves: 1 
+    };
+    let bucket_two_filled = State { 
+        fillings: Fillings(0, capacity_2), 
+        cap1: capacity_1, 
+        cap2: capacity_2, 
+        moves: 1 
+    };
     if *start_bucket == Bucket::One {
         state_queue.push_back(bucket_one_filled);
         forbidden_fillings.insert(bucket_two_filled.fillings);
