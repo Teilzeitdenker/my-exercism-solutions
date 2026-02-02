@@ -1,30 +1,34 @@
 module RestApi
 
 open System.Text.Json
-open System.Text.Json.Serialization
 open System.Collections.Generic
-open System.Globalization
 
-let emptyDict = new SortedDictionary<string, float>()
+// following workaround is only necessary with floats to avoid getting 
+// rounded values after serialization, no problem when using decimal instead
 
-type FloatConverter() = 
-    inherit JsonConverter<float>()
-    override _.Read(_, _, _) = failwith "not needed"
-    override _.Write(writer, value, _) = 
-        writer.WriteRawValue(value.ToString("0.0#", CultureInfo.InvariantCulture))
+// open System.Text.Json.Serialization
+// open System.Globalization
 
-let serializerOptions : JsonSerializerOptions = 
-    let options = new JsonSerializerOptions()
-    options.Converters.Add(new FloatConverter())
-    options
+//type FloatConverter() = 
+//    inherit JsonConverter<float>()
+//    override _.Read(_, _, _) = failwith "not needed"
+//    override _.Write(writer, value, _) = 
+//        writer.WriteRawValue(value.ToString("0.0#", CultureInfo.InvariantCulture))
 
-let serialize o = JsonSerializer.Serialize(o, serializerOptions)
+//let serializerOptions : JsonSerializerOptions = 
+//    let options = new JsonSerializerOptions()
+//    options.Converters.Add(new FloatConverter())
+//    options
+
+let emptyDict = new SortedDictionary<string, decimal>()
+
+let serialize o = JsonSerializer.Serialize o // use serializerOptions default value
 
 type UserObject = {
     name : string
-    owes : SortedDictionary<string, float> 
-    owed_by : SortedDictionary<string, float>
-    balance : float
+    owes : SortedDictionary<string, decimal> 
+    owed_by : SortedDictionary<string, decimal>
+    balance : decimal
 }
 
 type User = { user : string }
@@ -36,12 +40,13 @@ type Database = { users : UserObject list }
 type IOU = {
     lender : string
     borrower : string 
-    amount : float
+    amount : decimal
 }
 
 let toUserList (db : Database) : UserList = 
     { users = db.users |> List.map (fun user -> user.name) }
 
+// since the document is mutable, this would also support several successive requests 
 type RestApi(database : string) =
     let mutable document = JsonSerializer.Deserialize<Database>(database)
     member this.Get(url: string) =
@@ -59,7 +64,7 @@ type RestApi(database : string) =
         match url with 
         | "/add" -> 
             let user = JsonSerializer.Deserialize<User>(payload).user
-            let userObject = { name = user; owes = emptyDict; owed_by = emptyDict; balance = 0.0 }
+            let userObject = { name = user; owes = emptyDict; owed_by = emptyDict; balance = 0.0m }
             document <- { users = (userObject :: document.users) |> List.sortBy (fun u -> u.name) }
             serialize userObject
         | "/iou" ->
