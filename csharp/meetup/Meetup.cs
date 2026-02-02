@@ -22,24 +22,8 @@ public class Meetup
 
     public DateTime Day(DayOfWeek dayOfWeek, Schedule schedule)
     {
-        int i = (int)schedule;
-        if (i != 0)
-        {
-            for (int j = 0; j < 7; j++)
-            {
-                DateTime dt = new DateTime(_year, _month, i + j);
-                if (dt.DayOfWeek == dayOfWeek) return dt;
-            }
-        }
-        else
-        {
-            int numDays = DateTime.DaysInMonth(_year, _month);
-            for (int j = 0; j < 7; j++)
-            {
-                DateTime dt = new DateTime(_year, _month, numDays - j);
-                if (dt.DayOfWeek == dayOfWeek) return dt;
-            }
-        }
-        throw new ArgumentException();
+        int i = (int)schedule > 0 ? (int)schedule : DateTime.DaysInMonth(_year, _month) - 6;
+        DateTime dt = new DateTime(_year, _month, i);
+        return dt.AddDays((dayOfWeek - dt.DayOfWeek + 7) % 7);
     }
 }
