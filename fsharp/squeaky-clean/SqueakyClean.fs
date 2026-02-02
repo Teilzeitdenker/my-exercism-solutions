@@ -5,11 +5,11 @@ open System
 let transform c =
     match c with
     | ' '                         -> ""                    // no whitespace
-    | c when Char.IsDigit(c)      -> ""                    // no digits
+    | d when Char.IsDigit(d)      -> ""                    // no digits
     | '-'                         -> "_"                   // hyphen -> underscore
-    | c when Char.IsUpper(c)      -> $"-{Char.ToLower(c)}" // camelCase to kebab-case
-    | c when c >= 'α' && c <= 'ω' -> "?"                   // lower greek letters to question marks
-    | c                           -> c.ToString()          // all other chars unchanged (but as string)
+    | B when Char.IsUpper(B)      -> $"-{Char.ToLower(B)}" // camelCase to kebab-case
+    | g when g >= 'α' && g <= 'ω' -> "?"                   // lower greek letters to question marks
+    | _                           -> c.ToString()          // all other chars unchanged (but as string)
     
 let clean identifier =
     identifier |> Seq.fold (fun acc c -> acc + transform c) ""
