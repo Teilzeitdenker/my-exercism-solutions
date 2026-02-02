@@ -2,7 +2,8 @@ defmodule GoCounting do
   @type position :: {integer, integer}
   @type owner :: %{owner: atom, territory: [position]}
   @type territories :: %{white: [position], black: [position], none: [position]}
-
+  @offsets [{0, 1}, {0, -1}, {1, 0}, {-1, 0}]
+  
   @doc """
   Return the owner and territory around a position
   """
@@ -40,13 +41,13 @@ defmodule GoCounting do
     cond do
       not_on_board?(b, x, y) -> {[], []}
       {x, y} in done         -> {[], []}
-      true -> owner = entry(b, x, y)
-              if owner != ?_, do: {[owner], []}, else:
-                Enum.reduce([{0, 1}, {0, -1}, {1, 0}, {-1, 0}], {[], [{x, y}]},
-                  fn {x1, y1}, {entries, coords} ->
-                    {e, c} = territory(b, x + x1, y + y1, [{x, y}|done])
-                    {entries ++ e, coords ++ c}
-                  end)
+      true                   -> owner = entry(b, x, y)
+        if owner != ?_, do: {[owner], []}, else:
+          Enum.reduce(@offsets, {[], [{x, y}]},
+            fn {x1, y1}, {entries, coords} ->
+              {e, c} = territory(b, x + x1, y + y1, [{x, y}|done])
+              {entries ++ e, coords ++ c}
+            end)
     end
   end
 end
