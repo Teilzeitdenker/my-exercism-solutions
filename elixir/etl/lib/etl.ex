@@ -11,12 +11,12 @@ defmodule ETL do
   def transform(input) do
     input
     |> Map.to_list()
-    |> Enum.map(&scoreListPairToTupleList/1)
+    |> Enum.map(&score_list_pair_to_tuple_list/1)
     |> Enum.concat()
     |> Enum.into(%{})
   end
 
-  defp scoreListPairToTupleList({score, ls}) do
+  defp score_list_pair_to_tuple_list({score, ls}) do
     ls |> Enum.map(fn c -> {String.downcase(c), score} end)
   end
 
