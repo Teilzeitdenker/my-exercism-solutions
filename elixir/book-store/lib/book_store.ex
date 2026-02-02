@@ -9,7 +9,7 @@ defmodule BookStore do
   @spec total(basket :: [book]) :: integer
   def total(basket) do
     sorted_counts = [1, 2, 3, 4, 5] |> Enum.map(fn i -> Enum.count(basket, &(&1 == i)) end) |> Enum.sort()
-    stack_counts = sorted_counts |> Enum.zip([0] ++ (sorted_counts |> Enum.map(&-/1))) |> Enum.map(&Tuple.sum/1) # numbers of stacks with 5, 4, 3, 2, 1 different books from the series
+    stack_counts = sorted_counts |> Enum.zip([0 | sorted_counts |> Enum.map(&-/1)]) |> Enum.map(&Tuple.sum/1) # numbers of stacks with 5, 4, 3, 2, 1 different books from the series
     pairs_of_3_and_5 = min(stack_counts |> Enum.at(0), stack_counts |> Enum.at(2)) # any pair of these has to be converted into two 4-stacks to get the minimal price
     optimal_stack_counts =
       [Enum.at(stack_counts, 0) - pairs_of_3_and_5,
