@@ -10,7 +10,7 @@ defmodule Knapsack do
   end
 
   @spec process_item(item :: %{value: integer, weight: integer}, ls :: [integer]) :: [integer]
-  def process_item(item, ls) do
+  defp process_item(item, ls) do
     zipped = (ls |> Enum.drop(item.weight) |> Enum.zip(ls))
     (ls |> Enum.take(item.weight)) ++ (zipped |> Enum.map(fn {upper, lower} -> max(lower + item.value, upper) end))
   end
