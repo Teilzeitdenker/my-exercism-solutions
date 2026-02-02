@@ -30,11 +30,10 @@ let createHand (deal : string) =
       straight = (rks = ACE_TO_5) || (rks |> Array.distinct |> Array.length = 5 && rks[0] - rks[4] = 4) }
 
 let getLevelAndCrucialRanks hand = 
-    let (freqs, ranksByFreqsDesc) = 
+    let (ranksByFreqsDesc, freqs) = 
         hand.ranks
-        |> Array.groupBy id 
-        |> Array.map (fun (k, g) -> (Array.length g, k))
-        |> Array.sortByDescending (fun (l, k) -> (l, k))
+        |> Array.countBy id 
+        |> Array.sortByDescending (fun (rk, freq) -> (freq, rk))
         |> Array.unzip
     let lvl = 
         match (Array.length freqs, hand.straight, hand.flush) with 
@@ -54,16 +53,12 @@ let rec getScore ranksByFreqsDesc =
     else ranksByFreqsDesc |> Array.reduce (fun acc el -> acc * 14 + el)
 
 let topGroupBy f =
-    List.groupBy f 
-    >> List.sortByDescending fst 
-    >> List.head 
-    >> snd
+    List.groupBy f >> List.sortByDescending fst >> List.head >> snd
 
 let bestHands (deals : string list) = 
     deals
     |> List.map (fun deal -> (deal, deal |> createHand |> getLevelAndCrucialRanks))
     |> topGroupBy (snd >> fst) // extract the hands with best level
-    |> List.map (fun (deal, (_, rks)) -> (deal, getScore rks))
+    |> List.map (fun (deal, (_, rks)) -> (deal, getScore rks)) // throw away level and score the crucial ranks
     |> topGroupBy snd // extract the hands with best score
-    |> List.unzip 
-    |> fst // extract the strings of these deals
+    |> List.unzip |> fst // extract the strings of these deals
