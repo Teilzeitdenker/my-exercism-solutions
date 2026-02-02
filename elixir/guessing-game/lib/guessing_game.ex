@@ -1,5 +1,5 @@
 defmodule GuessingGame do
-  def compare(_secret_number, _guess \\ :nope)
+  def compare(secret_number, guess \\ :nope)
   def compare(_secret_number, guess) when guess == :nope do
     "Make a guess"
   end
