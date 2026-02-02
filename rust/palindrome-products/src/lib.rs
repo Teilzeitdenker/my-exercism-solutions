@@ -1,10 +1,13 @@
-use std::cmp::Ordering;
+// use std::cmp::Ordering;
+
 
 /// `Palindrome` is a newtype which only exists when the contained value is a palindrome number in base ten.
 ///
 /// A struct with a single field which is used to constrain behavior like this is called a "newtype", and its use is
 /// often referred to as the "newtype pattern". This is a fairly common pattern in Rust.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+
+// just derive the Ord and PartialOrd traits for this struct!!
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Palindrome(u64);
 
 impl Palindrome {
@@ -25,24 +28,27 @@ impl Palindrome {
     pub fn into_inner(&self) -> u64 {
         self.0
     }
-    pub fn compare(&self, other: &Palindrome) -> Ordering {
-        self.into_inner().cmp(&other.into_inner())
-    }
+    // not needed if Ord is derived above
+
+    // pub fn compare(&self, other: &Palindrome) -> Ordering {
+    //     self.into_inner().cmp(&other.into_inner())
+    // }
 }
-// I'm sure one could also do this with the MinMaxResult from Itertools, but 
+// I'm sure one could also do this with the MinMaxResult from Itertools, but this doesn't really work in a fitting way
 pub fn palindrome_products(min: u64, max: u64) -> Option<(Palindrome, Palindrome)> {
     let palindromes: Vec<Palindrome> = 
         (min..=max)
         .flat_map(|i| 
             (i..=max)
             .filter_map(move |j| Palindrome::new(i*j))).collect();
-    let minimum = 
-        &palindromes.iter()
-        .min_by(|&a, &b| Palindrome::compare(a, b));
-    let maximum = 
-        &palindromes.iter()
-        .max_by(|&a, &b| Palindrome::compare(a, b));
-    match (minimum, maximum) {
+    // can be done shorter...
+    // let minimum = 
+    //     palindromes.iter().min();
+    //     // .min_by(|&a, &b| Palindrome::compare(a, b));
+    // let maximum = 
+    //     palindromes.iter().max();
+    //     // .max_by(|&a, &b| Palindrome::compare(a, b));
+    match (palindromes.iter().min(), palindromes.iter().max()) {
         (Some(&p1), Some(&p2)) => Some((p1, p2)),
         _ => None
     }
