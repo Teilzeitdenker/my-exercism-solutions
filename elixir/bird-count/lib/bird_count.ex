@@ -17,14 +17,21 @@ defmodule BirdCount do
     0 in list
   end
 
-  def total(list) do
-    List.foldr(list, 0, fn x, acc -> acc + x end)
+  def total([]) do
+    0
+  end
+  def total([h | r]) do
+    h + total(r)
   end
 
-  def busy_days(list) do
-    List.foldr(list, 0, fn
-      x, acc when x >= 5 -> acc + 1
-      _, acc -> acc
-     end)
+  def busy_days([]) do
+    0
+  end
+  def busy_days([h | r]) do
+    if h >= 5 do
+      busy_days(r) + 1
+    else
+      busy_days(r)
+    end
   end
 end
