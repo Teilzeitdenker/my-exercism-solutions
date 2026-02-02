@@ -22,10 +22,10 @@ let rec toList = function
     | Nil -> []
     | Data (t, rest) -> t :: (toList rest)
 
-
-let rec fromList = function
-    | [] -> Nil 
-    | h :: rest -> Data (h, fromList rest)
+let rec fromList ls = List.foldBack create ls Nil 
+//function
+//    | [] -> Nil 
+//    | h :: rest -> Data (h, fromList rest)
 
 let reverse x = 
     let rec loop acc = function
