@@ -1,22 +1,26 @@
 module Bob
 
 let isQuestion (s:string) : bool = 
-    if s.Trim() = "" then
+    if s = "" then
         false
     else 
-        s.Trim() |> Seq.last = '?'
+        s |> Seq.last = '?'
+
+let containsLetters (s:string) =
+    s |> Seq.exists System.Char.IsLetter
 
 let isUpperCase s : bool = 
-    if Seq.where System.Char.IsLetter s |> Seq.length = 0 then 
-        false 
+    if containsLetters s then 
+        s.ToUpper() = s 
     else 
-        String.map System.Char.ToUpper s = s
+        false
 
 
 let response (input: string): string = 
-    let yelled : bool = isUpperCase input
-    let question : bool = isQuestion input
-    if input.Trim() = "" then 
+    let s = input.Trim()
+    let yelled : bool = isUpperCase s
+    let question : bool = isQuestion s
+    if s = "" then 
         "Fine. Be that way!"
     elif yelled && question then
         "Calm down, I know what I'm doing!"
