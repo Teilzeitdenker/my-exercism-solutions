@@ -1,12 +1,14 @@
 module Proverb
 
-let recite (input: string list): string list = 
-    let rec tailRecite head rest ls =
-        match rest with
-        | [] -> ls
-        | [one] -> ls @ [sprintf "And all for the want of a %s." head]
-        | first :: second :: rest -> ls @ [sprintf "For want of a %s the %s was lost." first second] |> tailRecite head (second::rest) 
+let moral word =
+    sprintf "And all for the want of a %s." word
+
+let stanza (a , b) =
+    sprintf "For want of a %s the %s was lost." a b
+
+let recite (input: string list): string list =
     match input with
     | [] -> []
-    | [word] -> [sprintf "And all for the want of a %s." word]
-    | head :: second :: rest -> tailRecite head (second::rest) [sprintf "For want of a %s the %s was lost." head second]   
+    | [word] -> [moral word]
+    | word :: _  -> (input |> List.pairwise |> List.map stanza) @ [moral word]
+                 
