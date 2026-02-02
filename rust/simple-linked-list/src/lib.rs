@@ -1,60 +1,63 @@
 use std::iter::FromIterator;
 
-#[derive(Debug, Clone)]
-struct Node<T> where T: Clone + Copy {
+struct Node<T> {
     data: T,
     next: Option<Box<Node<T>>>,
 }
 
-pub struct SimpleLinkedList<T> where T: Clone + Copy {
+impl<T> Node<T> {
+    fn new(data: T, next: Option<Box<Node<T>>>) -> Self {
+        Self {data, next}
+    }
+}
+
+pub struct SimpleLinkedList<T> {
     head: Option<Box<Node<T>>>,
 }
 
-impl<T> SimpleLinkedList<T> where T: Clone + Copy {
-    pub fn new() -> Self {
-        SimpleLinkedList { head: None }
-    }
+impl<T> SimpleLinkedList<T> {
+    pub fn new() -> Self { Self { head: None } }
 
-    pub fn is_empty(&self) -> bool {
-        self.head.is_none()
-    }
+    pub fn is_empty(&self) -> bool { self.head.is_none() }
 
     pub fn len(&self) -> usize {
-        if self.is_empty() {return 0;}
-        let mut res = 1;
-        let mut actual_node = self.head.as_ref().unwrap().clone();
-        while  actual_node.next.is_some() {
+        let mut res = 0;
+        let mut actual_node = &self.head;
+        while let Some(node) = actual_node {
             res += 1;
-            actual_node = actual_node.next.unwrap();
+            actual_node = &node.next;
         }
         res
     }
 
-    pub fn push(&mut self, element: T) where T: Clone {
-        self.head = Some(Box::new(Node { data: element, next: self.head.clone() }))
+    pub fn push(&mut self, element: T) {
+        self.head = Some(Box::new(Node::new(element, self.head.take())))
     }
 
     pub fn pop(&mut self) -> Option<T> {
         if self.is_empty() {return None;}
-        let data = self.head.as_ref().unwrap().data;
-        self.head = self.head.clone().unwrap().next;
-        Some(data)
+        let old_head = self.head.take().unwrap();
+        self.head = old_head.next;
+        Some(old_head.data)
     }
 
     pub fn peek(&self) -> Option<&T> {
-        if self.is_empty() {return None;}
-        Some(&self.head.as_ref().unwrap().data)
+        // if self.is_empty() {return None;}
+        // Some(&self.head.as_ref().unwrap().data)
+        self.head.as_ref().map(|head| &head.data)
     }
 
     #[must_use]
-    pub fn rev(self) -> SimpleLinkedList<T> {
-        let mut as_vec = Vec::from(self);
-        as_vec.reverse();
-        SimpleLinkedList::from_iter(as_vec)
+    pub fn rev(mut self) -> SimpleLinkedList<T> {
+        let mut reversed = SimpleLinkedList::new();
+        while let Some(content) = self.pop() {
+            reversed.push(content);
+        }
+        reversed
     }
 }
 
-impl<T> FromIterator<T> for SimpleLinkedList<T> where T: Clone + Copy {
+impl<T> FromIterator<T> for SimpleLinkedList<T> {
     fn from_iter<I: IntoIterator<Item = T>>(iter: I) -> Self {
         let mut ls = SimpleLinkedList::new();
         iter.into_iter().for_each(|el| ls.push(el));
@@ -62,7 +65,7 @@ impl<T> FromIterator<T> for SimpleLinkedList<T> where T: Clone + Copy {
     }
 }
 
-impl<T> From<SimpleLinkedList<T>> for Vec<T> where T: Clone + Copy {
+impl<T> From<SimpleLinkedList<T>> for Vec<T> {
     fn from(mut linked_list: SimpleLinkedList<T>) -> Vec<T> {
         let mut res = Vec::new();
         while let Some(actual_el) = linked_list.pop() {
