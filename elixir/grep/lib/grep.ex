@@ -18,7 +18,7 @@ defmodule Grep do
     case_insensitive = flags |> Enum.member?("-i")
     invert_match = flags |> Enum.member?("-v")
     match_full_lines = flags |> Enum.member?("-x")
-    rgx = Regex.compile!(if match_full_lines, do: "^#{pattern}$", else: pattern, if case_insensitive, do: "i", else: ""s)
+    rgx = Regex.compile! (if match_full_lines, do: "^#{pattern}$", else: pattern), (if case_insensitive, do: "i", else: "")
     result =
       if only_file_names do
         files
