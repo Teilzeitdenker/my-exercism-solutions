@@ -14,9 +14,9 @@ defmodule GoCounting do
     cond do
       not_on_board?(b, x, y) -> {:error, "Invalid coordinate"}
       entry(b, x, y) != ?_   -> {:ok, %{owner: :none, territory: []}}
-      true                   -> {entries, coords} = territory(b, x, y, [])
-        owner = case Enum.uniq(entries), do: ([?B]->:black; [?W]->:white; _->:none)
-        {:ok, %{owner: owner, territory: Enum.sort(Enum.uniq(coords))}}
+      true                   -> {edges, fields} = territory(b, x, y, [])
+        owner = case Enum.uniq(edges), do: ([?B]->:black; [?W]->:white; _->:none)
+        {:ok, %{owner: owner, territory: Enum.sort(Enum.uniq(fields))}}
     end
   end
 
@@ -43,9 +43,9 @@ defmodule GoCounting do
       true                   -> owner = entry(b, x, y)
         if owner != ?_, do: {[owner], []}, else:
           Enum.reduce(@offsets, {[], [{x, y}]},
-            fn {x1, y1}, {entries, coords} ->
-              {e, c} = territory(b, x + x1, y + y1, [{x, y}|done])
-              {entries ++ e, coords ++ c}
+            fn {dx, dy}, {edges, fields} ->
+              {de, df} = territory(b, x + dx, y + dy, [{x, y}|done])
+              {edges ++ de, fields ++ df}
             end)
     end
   end
