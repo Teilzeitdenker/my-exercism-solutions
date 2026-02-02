@@ -28,7 +28,7 @@ public static class FoodChain
         {
             ganzerText.Append($"\nShe swallowed the {_tiere[i]} to catch the {_tiere[i - 1]}{(_tiere[i - 1] == "spider" ? " that wriggled and jiggled and tickled inside her" : "")}.");
         }
-        ganzerText.Append("\n" + _ausrufe[1]);
+        ganzerText.Append($"\n{_ausrufe[1]}");
         return ganzerText.ToString();
     }
 
