@@ -2,32 +2,26 @@ module BinarySearchTree
 
 type Node = 
     | Null
-    | Node of Left:Node * Data:int * Right:Node
+    | Node of Node * int * Node
 
-let left node  = 
-    match node with 
-    | Null -> None
-    | Node(l, _, _) -> if l = Null then None else Some l
+let left = function
+    | Null | Node(Null, _, _) -> None
+    | Node(l, _, _) -> Some l
 
-let right node = 
-    match node with 
-    | Null -> None
-    | Node(_, _, r) -> if r = Null then None else Some r 
+let right = function 
+    | Null | Node(_, _, Null) -> None
+    | Node(_, _, r) -> Some r 
 
-let data node = 
-    match node with 
-    | Null -> 0
+let data = function
+    | Null -> failwith "No data for empty tree"
     | Node(_, d, _) -> d 
 
-let rec create (items:int list) =
-    match items with
+let rec create = function
     | [] -> Null 
     | x::xs  -> 
         let (ys, zs) = xs |> List.partition ((>=) x)
         Node(create ys, x, create zs) 
     
-
-let rec sortedData node = 
-    match node with 
+let rec sortedData = function
     | Null -> []
     | Node(l, d, r) -> sortedData l @ [d] @ sortedData r
