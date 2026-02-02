@@ -1,12 +1,15 @@
 module IsbnVerifier
 
-open System
 open System.Text.RegularExpressions
 
+let parseInt = function 
+    | 'X' -> 10
+    |  c  -> int c - int '0'
+
 let isValid (isbn: string) : bool = 
-    Regex.IsMatch(isbn, @"^(\d-?){9}(\d|X)$") &&
-    (isbn 
-        |> Seq.filter(Char.IsLetterOrDigit) 
-        |> Seq.mapi(fun i c -> ( if c = 'X' then 10 else (int) (Char.GetNumericValue(c)) ) * (10 - i) )
-        |> Seq.sum
-    ) % 11 = 0
+    let numbers = isbn.Replace("-", "")
+    Regex.IsMatch(numbers, @"^(\d){9}(\d|X)$") &&
+    numbers 
+        |> Seq.mapi(fun i c -> parseInt c * (10 - i) )
+        |> Seq.sum 
+        |> fun c -> c % 11 = 0
