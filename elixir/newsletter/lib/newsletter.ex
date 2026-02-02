@@ -12,12 +12,12 @@ defmodule Newsletter do
   end
 
   def open_log(path) do
-    {:ok, pid} = File.open(path, [:write])
-    pid
+    File.open!(path, [:write])
   end
 
   def log_sent_email(pid, email) do
-    IO.write(pid, email <> "\n")
+    IO.puts(pid, email)  # automatically adds a newline character
+    # IO.write(pid, email <> "\n")
   end
 
   def close_log(pid) do
@@ -34,6 +34,5 @@ defmodule Newsletter do
       end
     end)
     close_log(pid)
-    :ok
   end
 end
