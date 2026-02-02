@@ -1,6 +1,5 @@
 using System;
 using System.Collections;
-using System.Linq;
 
 public static class FlattenArray
 {
@@ -10,12 +9,9 @@ public static class FlattenArray
         {
             if (element is IEnumerable)
             {
-                IEnumerable innerObjects = Flatten(element as IEnumerable);
-                foreach (object innerObject in innerObjects)  yield return innerObject; 
-            } else
-            {
-                if (element != null)  yield return element; 
+                foreach (object innerObj in Flatten(element as IEnumerable))  yield return innerObj; 
             }
+            else if (element != null) yield return element;
         }
     }
 }
