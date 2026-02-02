@@ -12,7 +12,7 @@ impl Palindrome {
     pub fn new(value: u64) -> Option<Palindrome> {
         if Palindrome::is_palindrome(value) {Some(Palindrome(value))} else {None}
     }
-    fn is_palindrome(value: u64) -> bool {
+    pub fn is_palindrome(value: u64) -> bool {
         let mut acc: u64 = 0;
         let mut number = value.clone();
         while number != 0 {
@@ -31,20 +31,19 @@ impl Palindrome {
 }
 // I'm sure one could also do this with the MinMaxResult from Itertools, but 
 pub fn palindrome_products(min: u64, max: u64) -> Option<(Palindrome, Palindrome)> {
+    let palindromes: Vec<Palindrome> = 
+        (min..=max)
+        .flat_map(|i| 
+            (i..=max)
+            .filter_map(move |j| Palindrome::new(i*j))).collect();
     let minimum = 
-        (min..=max)
-        .flat_map(|i| 
-            (i..=max)
-            .filter_map(move |j| Palindrome::new(i*j)))
-        .min_by(|a, b| Palindrome::compare(a, b));
+        &palindromes.iter()
+        .min_by(|&a, &b| Palindrome::compare(a, b));
     let maximum = 
-        (min..=max)
-        .flat_map(|i| 
-            (i..=max)
-            .filter_map(move |j| Palindrome::new(i*j)))
-        .max_by(|a, b| Palindrome::compare(a, b));
+        &palindromes.iter()
+        .max_by(|&a, &b| Palindrome::compare(a, b));
     match (minimum, maximum) {
-        (Some(p1), Some(p2)) => Some((p1, p2)),
+        (Some(&p1), Some(&p2)) => Some((p1, p2)),
         _ => None
     }
 }
