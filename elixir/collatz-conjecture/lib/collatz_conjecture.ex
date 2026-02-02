@@ -5,21 +5,11 @@ defmodule CollatzConjecture do
     - if number is odd, multiply with 3 and add 1
     - if number is even, divide by 2
   """
-  def step(n) do
+  def calc(n) when is_integer(n) and n > 0 do
     cond do
-      n == 1 ->
-        0
-      rem(n, 2) == 0 ->
-        1 + step(div(n, 2))
-      true ->
-        1 + step(3*n + 1)
+      n == 1 -> 0
+      rem(n, 2) == 0 -> 1 + calc(div(n, 2))
+      true -> 1 + calc(3*n + 1)
     end
-  end
-
-  def calc(input) do
-    if not is_integer(input) || input <= 0 do
-      raise FunctionClauseError
-    end
-    step(input)
   end
 end
