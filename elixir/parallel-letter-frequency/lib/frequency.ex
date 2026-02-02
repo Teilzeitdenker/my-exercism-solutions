@@ -17,7 +17,7 @@ defmodule Frequency do
       end)
   end
 
-  def one_text_frequency(text) do
+  defp one_text_frequency(text) do
     text
     |> String.downcase
     |> String.graphemes
