@@ -22,11 +22,11 @@ type Die =
     | Five  = 5
     | Six   = 6
 
-let frequencies (dice : Die list) : Map<Die, int> =
-    dice |> Seq.groupBy id |> Seq.map (fun (die, ls) -> (die, Seq.length ls)) |> Map.ofSeq
+let frequencies (dice : Die list) : (Die * int) seq =
+    dice |> Seq.countBy id
 
 let freqVals (dice : Die list) : int list = 
-    frequencies dice |> Map.values |> Seq.sort |> Seq.toList
+    frequencies dice |> Seq.map snd |> Seq.sort |> Seq.toList
 
 let score (category : Category) (dice : Die list) : int = 
     match category with 
@@ -37,7 +37,7 @@ let score (category : Category) (dice : Die list) : int =
     | Fives          -> (dice |> Seq.filter ((=) Die.Five)  |> Seq.length) * 5
     | Sixes          -> (dice |> Seq.filter ((=) Die.Six)   |> Seq.length) * 6
     | FullHouse      -> if freqVals dice = [2; 3] then dice |> Seq.map int |> Seq.sum else 0
-    | FourOfAKind    -> frequencies dice |> Seq.map (fun kvp -> if [4; 5] |> Seq.contains kvp.Value then 4 * int kvp.Key else 0) |> Seq.sum
+    | FourOfAKind    -> frequencies dice |> Seq.map (fun (die, freq) -> if [4; 5] |> Seq.contains freq then 4 * int die else 0) |> Seq.sum
     | LittleStraight -> if dice |> List.map int |> List.sort = [1..5] then 30 else 0
     | BigStraight    -> if dice |> List.map int |> List.sort = [2..6] then 30 else 0
     | Choice         -> dice |> Seq.map int |> Seq.sum 
