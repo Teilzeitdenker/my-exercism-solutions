@@ -3,7 +3,7 @@ defmodule BasketballWebsite do
     extract_with_list(data, String.split(path, ".") )
   end
 
-  def extract_with_list(data, path_list) do
+  defp extract_with_list(data, path_list) do
     case path_list do
       [] -> data
       [h|t] -> extract_with_list(data[h], t)
