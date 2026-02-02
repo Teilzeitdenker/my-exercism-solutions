@@ -21,8 +21,6 @@ defmodule RPG.CharacterSheet do
     character_map = Map.put(character_map, :name, ask_name())
     character_map = Map.put(character_map, :class, ask_class())
     character_map = Map.put(character_map, :level, ask_level())
-    IO.write("Your character: ")
-    IO.inspect(character_map)
-    character_map
+    IO.inspect(character_map, label: "Your character")
   end
 end
