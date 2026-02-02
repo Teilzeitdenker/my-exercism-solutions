@@ -6,26 +6,11 @@ defmodule Dominoes do
   possible to make a full chain
   """
   @spec chain?(dominoes :: [domino]) :: boolean
-  def chain?(dominoes) do
-    case dominoes do
-      [] -> true
-      [{a, b}] -> a == b
-      [x | xs] -> get_chains(x, xs) |> Enum.any?(&chain?/1)
-    end
-  end
+  def chain?([]), do: true
+  def chain?([{a, b}]), do: a == b
+  def chain?([x | xs]), do: get_next_chains(x, xs) |> Enum.any?(&chain?/1)
 
-  defp get_chains(x, xs) do
-    (for n <- 1 .. length(xs), do: Enum.slide(xs, n - 1, 0))
-    |> Enum.filter(&does_chain?(&1, x))
-    |> Enum.map(&do_chain(&1, x))
-  end
-
-  defp does_chain?([{a, b} | _], {_, en}) do
-    if en == a or en == b, do: true, else: false
-  end
-
-  # When using this, one already knows that the dominoes match, so else case is just switching
-  defp do_chain([{a, b} | ds], {st, en}) do
-    if en == a, do: [{st, b} | ds], else: [{st, a} | ds]
-  end
+  defp get_next_chains(x, xs), do: (for n <- 1 .. length(xs), do: Enum.slide(xs, n - 1, 0)) |> Enum.filter(&does_chain?(&1, x)) |> Enum.map(&do_chain(&1, x))
+  defp does_chain?([{a, b} | _], {_, en}), do: if en == a or en == b, do: true, else: false
+  defp do_chain([{a, b} | ds], {st, en}), do: if en == a, do: [{st, b} | ds], else: [{st, a} | ds]
 end
