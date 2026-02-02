@@ -7,12 +7,12 @@ defmodule PalindromeProducts do
     if max_factor < min_factor, do: raise ArgumentError
     min_factor..max_factor
     |> Stream.flat_map(fn i -> i..max_factor |> Enum.map(fn j -> [i, j] end)  end)
-    |> Stream.filter(fn [a, b] -> is_palindrome?(a * b) end)
+    |> Stream.filter(fn [a, b] -> palindrome?(a * b) end)
     |> Enum.group_by(fn [a, b] -> a * b end)
   end
 
-  @spec is_palindrome?(non_neg_integer()) :: boolean()
-  defp is_palindrome?(n) do
+  @spec palindrome?(non_neg_integer()) :: boolean()
+  defp palindrome?(n) do
     n == rev(0, n)
   end
 
