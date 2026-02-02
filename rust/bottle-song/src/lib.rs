@@ -6,7 +6,8 @@ fn get_bottle_text(n: u32, cap: bool) -> String {
 
 fn verse(n: u32) -> String {
     let start : String = format!("{} hanging on the wall,\n", get_bottle_text(n, true));
-    format!("{}{}{}", start, start, format!("And if one green bottle should accidentally fall,\nThere'll be {} hanging on the wall.", get_bottle_text(n - 1, false)))
+    let ending : String = format!("And if one green bottle should accidentally fall,\nThere'll be {} hanging on the wall.", get_bottle_text(n - 1, false));
+    format!("{}{}{}", start, start, ending)
 }
 
 pub fn recite(start_bottles: u32, take_down: u32) -> String {
