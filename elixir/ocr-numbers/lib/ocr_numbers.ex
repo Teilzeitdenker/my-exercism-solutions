@@ -38,19 +38,19 @@ defmodule OcrNumbers do
   end
 
   @spec chunks_of_3(String.t()) :: [String.t()]
-  def chunks_of_3(s) do
+  defp chunks_of_3(s) do
     s |> String.codepoints() |> Enum.chunk_every(3) |> Enum.map(&Enum.join/1)
   end
 
   @spec transpose([[String.t()]]) :: [[String.t()]]
-  def transpose([]), do: []
-  def transpose([[]|_]), do: []
-  def transpose(list) do
+  defp transpose([]), do: []
+  defp transpose([[]|_]), do: []
+  defp transpose(list) do
     [ Enum.map(list, &hd/1) | transpose(Enum.map(list, &tl/1)) ]
   end
 
   @spec decode(String.t(), %{}) :: String.t()
-  def decode(s, m) do
+  defp decode(s, m) do
     if m |> Map.has_key?(s) do
       m |> Map.fetch!(s)
     else
