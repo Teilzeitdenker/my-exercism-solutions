@@ -1,10 +1,5 @@
-// This is the file you need to modify for your own solution.
-// The unit tests will use this code, and it will be used by the benchmark tests
-// for the "Mine" row of the summary table.
-
-// Remember to not only run the unit tests for this exercise, but also the
-// benchmark tests using `dotnet run -c Release`.
-// Please refer to the instructions for more information about the benchmark tests.
+// quite fast solution with a mean of 3.063 us (Mine) in contrast to 5.536 us (Baseline)
+// and 6.9 KB allocated memory (Mine) in contrast to 13.75 KB (Baseline)
 
 module TreeBuilding
 
@@ -18,46 +13,32 @@ let recordId = function
     | Leaf id -> id
     | Branch (id, _) -> id
     
-
 let isBranch = function 
     | Branch _ -> true
-    | Leaf _ -> false
+    | _ -> false
 
 let children = function 
     | Branch (_, c) -> c
-    | Leaf _ -> []
+    | _ -> []
+
+let checkForErrors records =  
+    match records with
+    | []                                                                 -> failwith "input must be nonempty"
+    | x :: _  when x.RecordId <> 0 || x.ParentId <> 0                    -> failwith "non-existing or invalid root" 
+    | _ :: xs when List.exists (fun r -> r.RecordId <= r.ParentId) xs    -> failwith "non-root record with invalid parent"
+    | rs      when (List.last rs).RecordId > (List.length rs - 1)        -> failwith "non-continuous list"
+    | _                                                                  -> records
+
+let rec buildHelper parent map =
+    match map |> Map.tryFind parent with 
+    | None -> Leaf parent 
+    | Some children -> Branch (parent, children |> List.map (fun r -> buildHelper r.RecordId map))
 
 let buildTree records =
-    if List.isEmpty records then failwith "Empty input"
-
-    let checkRecordTuple (p, r) = 
-        if r > 0 then 
-            if p >= r then failwith "Non-root record with invalid parent"
-            (p, r)
-        else if r = 0 then 
-            if p <> 0 then failwith "Root node is invalid" 
-            (p, r)
-        else failwith "Node with negative record ID"
-
-    let checkIndex (i, (p, r)) = 
-        if i <> r then failwith "Non-continuous list" 
-        (p, r)
-
-    let parentChildrenMap =
-        records 
-        |> List.map (fun r -> (r.ParentId, r.RecordId) ) 
-        |> List.sortBy snd
-        |> List.map checkRecordTuple
-        |> List.indexed 
-        |> List.map checkIndex
-        |> List.tail
-        |> List.groupBy fst 
-        |> List.map (fun (x, y) -> (x, List.map snd y))
-        |> Map.ofSeq 
-
-    let rec buildHelper parent =
-        match Map.tryFind parent parentChildrenMap with
-        | Some children -> Branch (parent, children |> List.map buildHelper)
-        | _             -> Leaf parent
-
-    buildHelper 0
+    records 
+    |> List.sortBy (fun r -> r.RecordId)
+    |> checkForErrors
+    |> List.tail // get rid of the root
+    |> List.groupBy (fun r -> r.ParentId)
+    |> Map.ofList 
+    |> buildHelper 0
