@@ -20,6 +20,8 @@ type Move =
 let allMoves = [FillOne; FillTwo; EmptyOne; EmptyTwo; PourRight; PourLeft]
 
 let measure sizeOne sizeTwo (goal: int) (startBucket: Bucket) =
+    let initialState = if startBucket = Bucket.One then (sizeOne, 0) else (0, sizeTwo)
+    let forbiddenState = if startBucket = Bucket.One then (0, sizeTwo) else (sizeOne, 0)
     let applyMove ((a, b): State) (move: Move)  = 
         match move with
         | FillOne   -> (sizeOne, b) 
@@ -32,35 +34,21 @@ let measure sizeOne sizeTwo (goal: int) (startBucket: Bucket) =
         | PourRight -> 
             let toPour = min (sizeTwo - b) a 
             (a - toPour, b + toPour)
-    // tailored to be used with List.unfold
-    let getNextStates ((states, explored): State list * State list) : (State list * (State list * State list)) option = 
-        let nxtStates =
-            states |> List.collect (fun st -> 
-                allMoves 
-                |> List.map (applyMove st)
-                |> List.filter (fun ex -> not (List.contains ex explored)) 
-            ) |> List.distinct
-        if nxtStates = [] then 
-            None 
-        else
-            Some (states, (nxtStates, explored |> List.append nxtStates))
-    // put the initial state into getNextStates and unfold
-    let allReachableStates : State list list =
-        let start = if startBucket = Bucket.One then (sizeOne, 0) else (0, sizeTwo)
-        let forbidden = if startBucket = Bucket.One then (0, sizeTwo) else (sizeOne, 0)
-        List.unfold getNextStates ([start], [forbidden])
-    // tailored to be used with List.choose to extract a BucketResult from a (idx, list of states) tuple
-    let tryBucketResult (idx, ls) : BucketResult option = 
-        if List.exists (fst >> (=) goal) ls  then 
-            let (_, other) = List.find (fst >> (=) goal) ls 
-            Some { Moves = idx + 1; GoalBucket = Bucket.One; OtherBucket = other }
-        else if List.exists (snd >> (=) goal) ls then
-            let (other, _) = List.find (snd >> (=) goal) ls 
-            Some { Moves = idx + 1; GoalBucket = Bucket.Two; OtherBucket = other }
-        else 
-            None
-    // use index of reachable state list to get number of necessary moves
+    let getNextStates (states, explored) = 
+        match
+            states 
+            |> List.collect (fun st -> allMoves |> List.map (applyMove st) |> List.except explored) 
+            |> List.distinct
+        with 
+        | []        -> None 
+        | nxtStates -> Some (states, (nxtStates, explored |> List.append nxtStates))
+    let allReachableStates = List.unfold getNextStates ([initialState], [forbiddenState])
+    let tryBucketResult (idx, ls) =  
+        match (List.tryFind (fst >> (=) goal) ls, List.tryFind (snd >> (=) goal) ls) with 
+        | (Some (_, other), _) -> Some { Moves = idx + 1; GoalBucket = Bucket.One; OtherBucket = other }
+        | (_, Some (other, _)) -> Some { Moves = idx + 1; GoalBucket = Bucket.Two; OtherBucket = other }
+        | _                    -> None
     allReachableStates
     |> List.indexed 
     |> List.choose tryBucketResult
-    |> List.head // the test cases here guarantee an existing solution, otherwise use tryHead and distinguish cases
+    |> List.head 
