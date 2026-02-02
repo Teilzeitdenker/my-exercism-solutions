@@ -1,5 +1,5 @@
+use self::Allergen::*;
 pub struct Allergies(u32);
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Allergen {
     Eggs = 1,
@@ -11,21 +11,17 @@ pub enum Allergen {
     Pollen = 64,
     Cats = 128,
 }
-
 impl Allergies {
     pub fn new(score: u32) -> Self {
         Allergies(score)
     }
     pub fn iterator() -> impl Iterator<Item = Allergen> {
-        [Allergen::Eggs, Allergen::Peanuts, Allergen::Shellfish, Allergen::Strawberries, 
-        Allergen::Tomatoes, Allergen::Chocolate, Allergen::Pollen, Allergen::Cats]
-        .iter()
-        .copied()
+        [Eggs, Peanuts, Shellfish, Strawberries, Tomatoes, Chocolate, Pollen, Cats].iter().copied()
     }
     pub fn is_allergic_to(&self, allergen: &Allergen) -> bool {
         (self.0 | *allergen as u32) == self.0
     }
     pub fn allergies(&self) -> Vec<Allergen> {
-         Allergies::iterator().filter(|all| self.is_allergic_to(all)).collect()
+         Allergies::iterator().filter(|a| self.is_allergic_to(a)).collect()
     }
 }
