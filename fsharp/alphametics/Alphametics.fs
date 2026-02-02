@@ -8,13 +8,13 @@ open FParsec
 type private UserState = unit
 type private Parser<'t> = Parser<'t, UserState>
 
-let private upperLetter:  Parser<_> = anyOf (String [|'A'..'Z'|])
-let private word:      Parser<_> = spaces >>. many1Chars upperLetter .>> spaces
-let private leftOperands: Parser<_> = sepBy1 word (pstring "+") .>> (pstring "==")
-let private fullParser:   Parser<_> = leftOperands .>>. word .>> eof
+let private upperLetter: Parser<_> = anyOf (String [|'A'..'Z'|])
+let private word:        Parser<_> = spaces >>. many1Chars upperLetter .>> spaces
+let private summands:    Parser<_> = sepBy1 word (pstring "+") .>> (pstring "==")
+let private fullParser:  Parser<_> = summands .>>. word .>> eof
 
-let private parse equation =
-    match run fullParser equation with
+let private parse input =
+    match run fullParser input with
     | Failure(_, _, _)   -> None
     | Success(res, _, _) -> Some res 
 
@@ -97,8 +97,8 @@ let private compute summands result =
         |> Some
     | None      -> None
 
-let solve equation = 
-    match parse equation with
+let solve input = 
+    match parse input with
     | Some (summands, result) -> compute summands result
     | None                    -> None
     
