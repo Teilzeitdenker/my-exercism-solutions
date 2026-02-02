@@ -10,25 +10,19 @@ defmodule ListOps do
   def count([_|t]), do: 1 + count(t)
 
   @spec reverse(list) :: list
-  def reverse(l) do
-    reverse_acc([], l)
-  end
+  def reverse(l), do: reverse_acc([], l)
 
   defp reverse_acc(acc, []), do: acc
   defp reverse_acc(acc, [h|t]), do: reverse_acc([h|acc], t)
 
   @spec map(list, (any -> any)) :: list
-  def map(l, f) do
-    reverse(map_acc([], l, f))
-  end
+  def map(l, f), do: reverse(map_acc([], l, f))
 
   defp map_acc(acc, [], _), do: acc
   defp map_acc(acc, [h|t], f), do: map_acc([f.(h)|acc], t, f)
 
   @spec filter(list, (any -> as_boolean(term))) :: list
-  def filter(l, f) do
-    reverse(filter_acc([], l, f))
-  end
+  def filter(l, f), do: reverse(filter_acc([], l, f))
 
   defp filter_acc(acc, [], _), do: acc
   defp filter_acc(acc, [h|t], f), do: filter_acc (if f.(h), do: [h|acc], else: acc), t, f
@@ -36,14 +30,10 @@ defmodule ListOps do
   @type acc :: any
   @spec foldl(list, acc, (any, acc -> acc)) :: acc
   def foldl([], acc, _), do: acc
-  def foldl([h|t], acc, f) do
-    foldl(t, f.(h, acc), f)
-  end
+  def foldl([h|t], acc, f), do: foldl(t, f.(h, acc), f)
 
   @spec foldr(list, acc, (any, acc -> acc)) :: acc
-  def foldr(l, acc, f) do
-    foldl(reverse(l), acc, f)
-  end
+  def foldr(l, acc, f), do: foldl(reverse(l), acc, f)
 
   @spec append(list, list) :: list
   def append(a, b), do: reverse(append_rev(reverse(a), b))
@@ -53,9 +43,7 @@ defmodule ListOps do
 
   @spec concat([[any]]) :: [any]
   def concat([]), do: []
-  def concat(ll) do
-    concat_acc([], ll)
-  end
+  def concat(ll), do: concat_acc([], ll)
 
   defp concat_acc(acc, []), do: reverse(acc)
   defp concat_acc(acc, [h|t]), do: concat_acc(append_rev(acc, h), t)
