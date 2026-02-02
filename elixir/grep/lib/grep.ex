@@ -1,15 +1,13 @@
 defmodule Grep do
 
   @spec xor(boolean(), boolean()) :: boolean()
-  def xor(a, b) do
+  defp xor(a, b) do
     (a and !b) or (!a and b)
   end
 
   @spec print(boolean(), boolean(), String.t(), integer(), String.t()) :: String.t()
-  def print(use_filename, use_line_number, filename, line_number, line) do
-    file_format = if use_filename, do: "#{filename}:", else: ""
-    number_format = if use_line_number, do: "#{line_number}:", else: ""
-    "#{file_format}#{number_format}#{line}"
+  defp print(use_file, use_line_num, file, line_num, line) do
+    "#{if use_file, do: "#{file}:", else: ""}#{if use_line_num, do: "#{line_num}:", else: ""}#{line}"
   end
 
   @spec grep(String.t(), [String.t()], [String.t()]) :: String.t()
@@ -20,9 +18,7 @@ defmodule Grep do
     case_insensitive = flags |> Enum.member?("-i")
     invert_match = flags |> Enum.member?("-v")
     match_full_lines = flags |> Enum.member?("-x")
-    rgx_options = if case_insensitive, do: "i", else: ""
-    rgx_string = if match_full_lines, do: "^#{pattern}$", else: pattern
-    rgx = Regex.compile!(rgx_string, rgx_options)
+    rgx = Regex.compile!(if match_full_lines, do: "^#{pattern}$", else: pattern, if case_insensitive, do: "i", else: ""s)
     result =
       if only_file_names do
         files
