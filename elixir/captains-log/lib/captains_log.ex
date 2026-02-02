@@ -6,7 +6,8 @@ defmodule CaptainsLog do
   end
 
   def random_ship_registry_number() do
-    num = :rand.uniform(9000) + 999
+    num = (1000..9999) |> Enum.random()
+    # num = :rand.uniform(9000) + 999
     ~s(NCC-#{num})
   end
 
