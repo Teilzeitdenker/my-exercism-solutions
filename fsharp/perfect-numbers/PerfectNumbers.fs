@@ -13,7 +13,7 @@ module PerfectNumbers
 type Classification = Perfect | Abundant | Deficient 
 
 let aliquot n = 
-    [1 .. n/2]
+    seq [1 .. n/2]
     |> Seq.filter (fun i -> n % i = 0)
     |> Seq.sum
 
