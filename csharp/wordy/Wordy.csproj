@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>    
+    <TargetFramework>net8.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="QuestionnaireGrammar.cs" />
+    <Compile Remove="QuestionnaireGrammarTests.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="QuestionnaireGrammar.cs" />
+    <None Include="QuestionnaireGrammarTests.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.8.3" />
+    <PackageReference Include="Sprache" Version="2.3.1" />
+    <PackageReference Include="xunit" Version="2.4.1" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3" />
+    <PackageReference Include="Exercism.Tests" Version="0.1.0-beta1" />
+  </ItemGroup>
+
+</Project>
