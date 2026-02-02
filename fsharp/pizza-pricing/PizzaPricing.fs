@@ -17,8 +17,7 @@ let rec pizzaPrice (pizza: Pizza): int =
     | ExtraToppings pizza -> 2 + pizzaPrice pizza
 
 let rec orderPrice(pizzas: Pizza list): int = 
-    if pizzas = List.replicate 100_000 Margherita then 700_000
-    else match pizzas with 
+    match pizzas with 
     | [] -> 0
     | [pizza] -> pizzaPrice pizza + 3
     | [pizza1; pizza2] -> pizzaPrice pizza1 + pizzaPrice pizza2 + 2
