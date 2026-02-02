@@ -2,19 +2,22 @@ defmodule Minesweeper do
   @doc """
   Annotate empty spots next to mines with the number of mines next to them.
   """
+
   @spec annotate([String.t()]) :: [String.t()]
 
+  def annotate([]), do: []
+  def annotate([""]), do: [""]
   def annotate(board) do
-    if board |> Enum.empty?() || board == [""] do
-      board
-    else
-      cols = board |> Enum.at(0) |> String.length()
-      default_list = List.duplicate(List.duplicate(0, cols + 2), 3)
-      board
-        |> Enum.map(&get_flowers(&1, cols))
-        |> Enum.reduce({[], default_list}, &get_next_acc/2)
-        |> then(&add_last_lines_and_clean_up/1)
-    end
+    cols = board |> Enum.at(0) |> String.length()
+    board
+    |> Enum.map(&get_flowers(&1, cols))
+    |> Enum.reduce(fn row_flower, acc ->
+      new_row_at_minus_two = add_arrs(acc |> Enum.at(-2), row_flower |> Enum.at(0))
+      new_row_at_minus_one = add_arrs(acc |> Enum.at(-1), row_flower |> Enum.at(1))
+      new_last_row = row_flower |> Enum.at(2)
+      (acc |> Enum.drop(-2)) ++ [new_row_at_minus_two, new_row_at_minus_one, new_last_row]
+    end)
+    |> then(&clean_up/1)
   end
 
   defp get_flowers(row, cols) do
@@ -55,25 +58,6 @@ defmodule Minesweeper do
     end
   end
 
-  defp get_next_acc(row, {result, actual}) do
-    {new_row, next_actual} = add_rows(actual, row)
-    {
-      result ++ [get_result_string(new_row)],
-      next_actual
-    }
-  end
-
-  defp add_rows(row_flowers1, row_flowers2) do
-    {
-      row_flowers1 |> Enum.at(0),
-      [
-        add_arrs(row_flowers1 |> Enum.at(1), row_flowers2 |> Enum.at(0)),
-        add_arrs(row_flowers1 |> Enum.at(2), row_flowers2 |> Enum.at(1)),
-        row_flowers2 |> Enum.at(2)
-      ]
-    }
-  end
-
   defp get_result_string(row) do
     row
     |> Enum.drop(1)
@@ -88,8 +72,8 @@ defmodule Minesweeper do
     |> Enum.join
   end
 
-  defp add_last_lines_and_clean_up({not_yet, last_lines}) do
-    cleaned_last_lines = last_lines |> Enum.drop(-1) |> Enum.map(&get_result_string/1)
-    not_yet ++ cleaned_last_lines |> Enum.drop(2)
+  defp clean_up(result_rows) do
+    result_rows |> Enum.drop(1) |> Enum.drop(-1) |> Enum.map(&get_result_string/1)
   end
+
 end
