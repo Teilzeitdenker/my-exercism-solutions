@@ -1,5 +1,5 @@
 defmodule PaintByNumber do
-  use Bitwise
+  import Bitwise # use Bitwise is deprecated
 
   def palette_bit_size(color_count) do
     case color_count do
