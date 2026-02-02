@@ -4,7 +4,6 @@ defmodule Minesweeper do
   """
 
   @spec annotate([String.t()]) :: [String.t()]
-
   def annotate([]), do: []
   def annotate([""]), do: [""]
   def annotate(board) do
@@ -12,10 +11,11 @@ defmodule Minesweeper do
     board
     |> Enum.map(&get_flowers(&1, cols))
     |> Enum.reduce(fn row_flower, acc ->
-      new_row_at_minus_two = add_arrs(acc |> Enum.at(-2), row_flower |> Enum.at(0))
-      new_row_at_minus_one = add_arrs(acc |> Enum.at(-1), row_flower |> Enum.at(1))
-      new_last_row = row_flower |> Enum.at(2)
-      (acc |> Enum.drop(-2)) ++ [new_row_at_minus_two, new_row_at_minus_one, new_last_row]
+      (acc |> Enum.drop(-2)) ++ [
+        add_arrs(acc |> Enum.at(-2), row_flower |> Enum.at(-3)),
+        add_arrs(acc |> Enum.at(-1), row_flower |> Enum.at(-2)),
+        row_flower |> Enum.at(-1)
+      ]
     end)
     |> then(&clean_up/1)
   end
@@ -50,30 +50,22 @@ defmodule Minesweeper do
     Enum.zip(arr1, arr2) |> Enum.map(fn {el1, el2} -> add_nums(el1, el2) end)
   end
 
-  defp add_nums(el1, el2) do
-    if el1 < 0 || el2 < 0 do
-      -1
-    else
-      el1 + el2
-    end
-  end
-
-  defp get_result_string(row) do
-    row
-    |> Enum.drop(1)
-    |> Enum.drop(-1)
-    |> Enum.map(fn num ->
-      case num do
-        -1 -> "*"
-        0  -> " "
-        n  -> to_string(n)
-      end
-    end)
-    |> Enum.join
-  end
+  defp add_nums(el1, el2) when el1 < 0 or el2 < 0, do: -1
+  defp add_nums(el1, el2), do: el1 + el2
 
   defp clean_up(result_rows) do
     result_rows |> Enum.drop(1) |> Enum.drop(-1) |> Enum.map(&get_result_string/1)
   end
 
+  defp get_result_string(row) do
+    row |> Enum.drop(1)|> Enum.drop(-1)
+    |> Enum.map(fn num ->
+      case num do
+        -1 -> "*"
+        0  -> " "
+        n  -> Integer.to_string(n)
+      end
+    end)
+    |> Enum.join
+  end
 end
