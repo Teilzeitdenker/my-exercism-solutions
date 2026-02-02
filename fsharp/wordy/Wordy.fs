@@ -24,16 +24,19 @@ type private Operation =
         | Mul n -> a * n 
         | Div n -> a / n
 
-let private startOfQuestion : Parser<_> = skipString "What is" .>> spaces1
-let private endOfQuestion : Parser<_> = skipString "?" .>> eof
-let private int_ws = pint32 .>> spaces 
-let private parseSign = (choice Operation.operationsChoice) .>> spaces1
-let private parseOperation = parseSign .>>. int_ws |>> Operation.tupleToOperation
-let private firstNumAndAllOperations = int_ws .>>. (many parseOperation)
-let private fullParser = firstNumAndAllOperations |> between startOfQuestion endOfQuestion 
-let private calculate (start, operations) = operations |> Seq.fold Operation.operateOn start  
+let private parser = 
+    let startOfQuestion = skipString "What is" .>> spaces1
+    let endOfQuestion = skipString "?" .>> eof
+    let int_ws = pint32 .>> spaces 
+    let parseSign = (choice Operation.operationsChoice) .>> spaces1
+    let parseOperation = parseSign .>>. int_ws |>> Operation.tupleToOperation
+    let firstNumAndAllOperations = int_ws .>>. (many parseOperation)
+    firstNumAndAllOperations |> between startOfQuestion endOfQuestion 
+
+let private calculate (start, operations) = 
+    operations |> Seq.fold Operation.operateOn start  
 
 let answer (question : string) = 
-    match run fullParser question with 
-    | Failure(_, _, _) -> None 
+    match run parser question with 
+    | Failure(_, _, _)   -> None 
     | Success(res, _, _) -> calculate res |> Some
