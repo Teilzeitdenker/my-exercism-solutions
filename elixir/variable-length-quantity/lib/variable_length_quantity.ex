@@ -1,5 +1,5 @@
 defmodule VariableLengthQuantity do
-  use Bitwise
+  import Bitwise
   @doc """
   Encode integers into a bitstring of VLQ encoded bytes
   """
@@ -43,7 +43,7 @@ defmodule VariableLengthQuantity do
   defp split(bytelist) do
     heads = bytelist |> Enum.take_while(&number_continues?/1) # so the last byte is not yet attached
     case bytelist |> Enum.drop(heads |> Enum.count) do
-      [last | rest] -> [heads ++ [last]] ++ split(rest) # construct a list of lists here, attach the last byte to its heads
+      [last | rest] -> [ heads ++ [last] | split(rest) ] # construct a list of lists here, attach the last byte to its heads
       _ -> []
     end
   end
