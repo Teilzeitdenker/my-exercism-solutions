@@ -6,16 +6,17 @@ public static class Minesweeper
 {
     public static string[] Annotate(string[] input)
     {
-        if (input.Length == 0 || input[0] == "" || input.All(line => !line.Contains("*")))
+        if (input.Length == 0 || input[0] == "" || input.All(line =>!line.Contains("*")))
         {
             return input;
         }
         List<(int, int)> MineLocations = GetMineLocations(input);
         return input
-               .Select((line, i) => string.Join( "",
+               .Select((line, i) => string.Join("",
                     line
-                    .Select((ch, j) => ch == '*' ? -1 : NeighbouringFields(i, j).Where(loc => MineLocations.Contains(loc)).Count())
-                    .Select( num => num == -1 ? "*" : num == 0 ? " " : num.ToString() )
+                    .Select((ch, j) => ch == '*' ? -1 : 
+                        NeighbouringFields(i, j).Count(loc => MineLocations.Contains(loc)))
+                    .Select(num => num == -1 ? "*" : num == 0 ? " " : num.ToString())
                    )
                ).ToArray();
     }
