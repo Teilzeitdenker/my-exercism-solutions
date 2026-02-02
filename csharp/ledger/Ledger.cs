@@ -73,8 +73,9 @@ public static class Ledger
                 LocaleType.NL => "dd/MM/yyyy"
             };
         }
-        public LocaleType LocType { get; }
-        public CultureInfo Culture { get; }
+        // use property initialization to set a default value
+        public LocaleType LocType { get; } = LocaleType.US;
+        public CultureInfo Culture { get; } = CultureInfo.InvariantCulture;
     }
     
     // locale-dependent header
@@ -87,9 +88,9 @@ public static class Ledger
     // formatting constants and functions almost unchanged
     private const string Separator = " | ";
     private static string FormatDate(IFormatProvider Culture, DateTime date) => date.ToString("d", Culture);
-    private static string FormatDescription(string desc) => (desc.Length > 25) ? desc.Substring(0, 22) + "..." : desc.PadRight(25);
+    private static string FormatDescription(string desc) => (desc.Length > 25) ? $"{desc.Substring(0, 22)}..." : desc.PadRight(25);
     private static string FormatChange(IFormatProvider Culture, decimal cgh) =>
-        (cgh < 0.0m ? cgh.ToString("C", Culture) : cgh.ToString("C", Culture) + " ").PadLeft(13);
+        (cgh < 0.0m ? cgh.ToString("C", Culture) : $"{cgh.ToString("C", Culture)} ").PadLeft(13);
     private static string FormatEntry(IFormatProvider Culture, LedgerEntry entry) =>
         $"{FormatDate(Culture, entry.Date)}{Separator}{FormatDescription(entry.Desc)}{Separator}{FormatChange(Culture, entry.Chg)}";
     
