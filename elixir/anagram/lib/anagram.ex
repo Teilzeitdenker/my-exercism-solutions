@@ -1,7 +1,5 @@
 defmodule Anagram do
-  @doc """
-  Returns all candidates that are anagrams of, but not equal to, 'target'.
-  """
+
   defp char_map(letters) do
     letters |> String.downcase() |> String.to_charlist() |> Enum.frequencies()
   end
@@ -14,6 +12,9 @@ defmodule Anagram do
     String.downcase(target) != String.downcase(source)
   end
 
+  @doc """
+  Returns all candidates that are anagrams of, but not equal to, 'target'.
+  """
   @spec match(String.t(), [String.t()]) :: [String.t()]
   def match(target, candidates) do
     target_map = char_map(target)
