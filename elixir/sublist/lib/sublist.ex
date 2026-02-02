@@ -5,24 +5,13 @@ defmodule Sublist do
   """
   def compare(a, b) do
     case {a |> length, b |> length} do
-      {0, 0} -> :equal
-      {0, _} -> :sublist
-      {_, 0} -> :superlist
-      {n, n} ->
-        case a === b do
-          true -> :equal
-          _    -> :unequal
-        end
-      {m, n} when m < n ->
-        case b |> Enum.chunk_every(m, 1, :discard) |> Enum.any?(&(&1 === a)) do
-          true -> :sublist
-          _    -> :unequal
-        end
-      {n, m} when m < n ->
-        case a |> Enum.chunk_every(m, 1, :discard) |> Enum.any?(&(&1 === b)) do
-          true -> :superlist
-          _    -> :unequal
-        end
+      {n, n} -> if a === b, do: :equal, else: :unequal
+      {m, n} when m < n -> if is_sublist_of?(a, b), do: :sublist, else: :unequal
+      {n, m} when m < n -> if is_sublist_of?(b, a), do: :superlist, else: :unequal
     end
+  end
+
+  defp is_sublist_of?(a, b) do
+    if a == [], do: true, else: b |> Stream.chunk_every(length(a), 1, :discard) |> Enum.any?(&(&1 === a))
   end
 end
