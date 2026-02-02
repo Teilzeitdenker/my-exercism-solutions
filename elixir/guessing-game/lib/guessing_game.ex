@@ -1,9 +1,9 @@
 defmodule GuessingGame do
-  def compare(secret_number, guess \\ :nope)
-  def compare(_secret_number, guess) when guess == :nope do
+  def compare(secret_number, guess \\ :no_guess)
+  def compare(_, guess) when guess == :no_guess do
     "Make a guess"
   end
-  def compare(_secret_number, guess) when not is_number(guess) do
+  def compare(_, guess) when not is_integer(guess) do
     "Make a guess"
   end
   def compare(secret_number, guess) when secret_number == guess do
