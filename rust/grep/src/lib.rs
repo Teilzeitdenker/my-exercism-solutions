@@ -24,17 +24,16 @@ impl Flags {
 }
 
 pub fn grep(pattern: &str, flags: &Flags, files: &[&str]) -> Result<Vec<String>, Error> {
-    let pattern_str = if flags.entire_lines {
-        "^".to_string() + pattern + "$" 
-    } else {
-        pattern.to_string()
-    };
-    let multiple_files = files.len() > 1;
-    let re = RegexBuilder::new(&pattern_str).case_insensitive(flags.case_insensitive).build()?;
+    let pattern_str = if flags.entire_lines {"^".to_string() + pattern + "$"} else {pattern.to_string()};
+    let re = RegexBuilder::new(&pattern_str)
+        .case_insensitive(flags.case_insensitive)
+        .build()?;
     let mut results: Vec<String> = Vec::new();
     let print = |fname: &str, line_num: usize, val: &str| {
-        format!("{}{}{}", if multiple_files {fname.to_string() + ":"} else {"".to_string()}, if flags.line_numbers {line_num.to_string() + ":"} else {"".to_string()}, val)
-    };
+        format!("{}{}{}", 
+            if files.len() > 1 {fname.to_string() + ":"} else {"".to_string()}, 
+            if flags.line_numbers {line_num.to_string() + ":"} else {"".to_string()}, 
+            val)};
     for &filename in files {
         let file = BufReader::new(File::open(&filename)?);
         for (line_number, line_result) in file.lines().enumerate() {
