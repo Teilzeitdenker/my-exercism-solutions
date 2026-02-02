@@ -5,15 +5,15 @@ defmodule WineCellar do
 # das geht sicher besser, aber es funktioniert immerhin
   def filter(cellar, color, opts \\ []) do
     if Keyword.has_key?(opts, :year) and Keyword.has_key?(opts, :country)  do
-      Keyword.filter(cellar, fn {k, _} -> k == color end) |> Keyword.values() |> filter_by_year(Keyword.fetch!(opts, :year)) |> filter_by_country(Keyword.fetch!(opts, :country))
+      Keyword.filter(cellar, fn {k, _} -> k == color end) |> Keyword.get_values(color) |> filter_by_year(Keyword.fetch!(opts, :year)) |> filter_by_country(Keyword.fetch!(opts, :country))
     else
       if Keyword.has_key?(opts, :country) do
-        Keyword.filter(cellar, fn {k, _} -> k == color end) |> Keyword.values() |> filter_by_country(Keyword.fetch!(opts, :country))
+        Keyword.filter(cellar, fn {k, _} -> k == color end) |> Keyword.get_values(color) |> filter_by_country(Keyword.fetch!(opts, :country))
       else
         if Keyword.has_key?(opts, :year) do
-          Keyword.filter(cellar, fn {k, _} -> k == color end) |> Keyword.values() |> filter_by_year(Keyword.fetch!(opts, :year))
+          Keyword.filter(cellar, fn {k, _} -> k == color end) |> Keyword.get_values(color) |> filter_by_year(Keyword.fetch!(opts, :year))
         else
-          Keyword.filter(cellar, fn {k, _} -> k == color end) |> Keyword.values()
+          Keyword.filter(cellar, fn {k, _} -> k == color end) |> Keyword.get_values(color)
         end
       end
     end
