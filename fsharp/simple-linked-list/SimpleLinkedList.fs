@@ -22,7 +22,7 @@ let rec toList = function
     | Nil -> []
     | Data (t, rest) -> t :: (toList rest)
 
-let rec fromList ls = List.foldBack create ls Nil 
+let fromList ls = List.foldBack create ls Nil 
 //function
 //    | [] -> Nil 
 //    | h :: rest -> Data (h, fromList rest)
