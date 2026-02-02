@@ -34,7 +34,6 @@ public class GoCounting
 
         if (edges.Select(OwnerOf).Distinct().Count() == 1) 
              return (OwnerOf(edges.First()), fields);
-
         else return (Owner.None, fields);
     }
 
@@ -52,14 +51,9 @@ public class GoCounting
                 {
                     visited[x, y] = true;
                     var (owner, territory) = Territory((x, y));
-
-                    foreach (var (cx, cy) in territory)
-                    {
-                        res[owner].Add((cx, cy));
-                        visited[cx, cy] = true;
-                    }
+                    res[owner].UnionWith(territory);
+                    foreach (var (cx, cy) in territory) visited[cx, cy] = true;
                 }  
-
         return res;
     }
 
