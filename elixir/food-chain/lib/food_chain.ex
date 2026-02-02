@@ -16,16 +16,16 @@ defmodule FoodChain do
   end
 
   defp verse(n) do
-    ersteZeilen = ["I know an old lady who swallowed a #{@tiere |> Enum.at(n-1)}.", @ausrufe |> Enum.at(n-1)]
+    erste_zeilen = ["I know an old lady who swallowed a #{@tiere |> Enum.at(n-1)}.", @ausrufe |> Enum.at(n-1)]
     if n == 8 or n == 1 do
-      (ersteZeilen |> Enum.join("\n")) <> "\n"
+      (erste_zeilen |> Enum.join("\n")) <> "\n"
     else
-      mittlereZeilen =
+      mittlere_zeilen =
         for i <- Enum.reverse(1..n-1) do
           "She swallowed the #{@tiere |> Enum.at(i)} to catch the #{@tiere |> Enum.at(i-1)}#{sonderfall(i-1)}."
         end
-      letzteZeile = [@ausrufe |> Enum.at(0)]
-      (ersteZeilen ++ mittlereZeilen ++ letzteZeile |> Enum.join("\n")) <> "\n"
+      letzte_zeile = [@ausrufe |> Enum.at(0)]
+      (erste_zeilen ++ mittlere_zeilen ++ letzte_zeile |> Enum.join("\n")) <> "\n"
     end
   end
 
