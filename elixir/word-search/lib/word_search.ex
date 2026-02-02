@@ -1,11 +1,5 @@
 defmodule WordSearch do
   @directions [{1, 0},{1, 1},{0, 1},{-1, 1},{-1, 0},{-1, -1},{0, -1},{1, -1}]
-  def add_tuples({a1, b1}, {a2, b2}) do
-    {a1 + a2, b1 + b2}
-  end
-  def scalar_mult(k, {a, b}) do
-    {k*a, k*b}
-  end
 
   defmodule Location do
     defstruct [:from, :to]
@@ -26,12 +20,10 @@ defmodule WordSearch do
     words |> Enum.map(&check_word(grid_map, &1)) |> Map.new
   end
 
-  @doc """
-  Collects the grid into a map where the key is some character and the value
-  is a list of all position index tuples where this character appears.
-  """
+  # Collects the grid into a map where the key is some character and the value
+  # is a list of all position index tuples where this character appears.
   @spec grid_to_map(grid :: String.t()) :: %{String.t() => [{integer, integer}]}
-  def grid_to_map(grid) do
+  defp grid_to_map(grid) do
     grid
     |> String.split("\n", trim: true)
     |> Enum.map(&String.trim/1)
@@ -46,12 +38,10 @@ defmodule WordSearch do
     |> Enum.reduce(%{}, fn m, acc -> Map.merge(acc, m, fn _k, v1, v2 -> v1 ++ v2 end) end)
   end
 
-  @doc """
-  Enriches the starting positions from the grid_map with all possible 8 directions
-  and filters out the start-direction tuples that were successful. Only the first successful is returned
-  """
+  # Enriches the starting positions from the grid_map with all possible 8 directions
+  # and filters out the start-direction tuples that were successful. Only the first successful is returned
   @spec check_word(grid_map :: %{String.t() => [{integer, integer}]}, word :: String.t()) :: {String.t(), nil | Location.t()}
-  def check_word(grid_map, word) do
+  defp check_word(grid_map, word) do
     if word |> String.codepoints() |> Enum.any?(fn ch -> !Map.has_key?(grid_map, ch) end) do
       {word, nil}
     else
@@ -68,11 +58,9 @@ defmodule WordSearch do
     end
   end
 
-  @doc """
-  Recursively goes through the letters of the word and checks if the necessary calculated position appears in the grid map
-  """
+  # Recursively goes through the letters of the word and checks if the necessary calculated position appears in the grid map
   @spec check_direction_from(start :: {integer, integer}, direction :: {integer, integer}, grid_map :: %{String.t() => [{integer, integer}]}, word :: String.t(), index :: integer) :: bool
-  def check_direction_from(start, direction, grid_map, word, index) do
+  defp check_direction_from(start, direction, grid_map, word, index) do
     if index == String.length(word) do
       true
     else
@@ -82,5 +70,13 @@ defmodule WordSearch do
         false
       end
     end
+  end
+
+  # Small helper functions for addition and scalar multiplication of index tuples
+  defp add_tuples({a1, b1}, {a2, b2}) do
+    {a1 + a2, b1 + b2}
+  end
+  defp scalar_mult(k, {a, b}) do
+    {k*a, k*b}
   end
 end
