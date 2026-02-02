@@ -16,16 +16,18 @@ defmodule ListOps do
   defp reverse_acc(acc, [h|t]), do: reverse_acc([h|acc], t)
 
   @spec map(list, (any -> any)) :: list
-  def map(l, f), do: reverse(map_acc([], l, f))
+  def map([], _f), do: []
+  def map([h|t], f), do: [f.(h)|map(t, f)]
 
-  defp map_acc(acc, [], _), do: acc
-  defp map_acc(acc, [h|t], f), do: map_acc([f.(h)|acc], t, f)
+  # defp map_acc(acc, [], _), do: acc
+  # defp map_acc(acc, [h|t], f), do: map_acc([f.(h)|acc], t, f)
 
   @spec filter(list, (any -> as_boolean(term))) :: list
-  def filter(l, f), do: reverse(filter_acc([], l, f))
+  def filter([], _f), do: []
+  def filter([h|t], f), do: (if f.(h), do: [h|filter(t, f)], else: filter(t, f))
 
-  defp filter_acc(acc, [], _), do: acc
-  defp filter_acc(acc, [h|t], f), do: filter_acc (if f.(h), do: [h|acc], else: acc), t, f
+  # defp filter_acc(acc, [], _), do: acc
+  # defp filter_acc(acc, [h|t], f), do: filter_acc (if f.(h), do: [h|acc], else: acc), t, f
 
   @type acc :: any
   @spec foldl(list, acc, (any, acc -> acc)) :: acc
