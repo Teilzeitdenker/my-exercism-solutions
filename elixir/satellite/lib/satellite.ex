@@ -24,8 +24,12 @@ defmodule Satellite do
   defp do_build([], []), do: {}
   defp do_build([a], [b]) when a == b, do: {{}, a, {}}
   defp do_build([root | preorder], inorder) do
-    {fst_inorder, [_el | snd_inorder]} = inorder |> Enum.split_while(fn item -> item != root end)
-    num_to_take = fst_inorder |> Enum.count()
-    {do_build(preorder |> Enum.take(num_to_take), fst_inorder), root, do_build(preorder |> Enum.drop(num_to_take), snd_inorder)}
+    {fst_inorder, [_root | snd_inorder]} = inorder |> Enum.split_while(&(&1 != root))
+    num_in_fst = fst_inorder |> Enum.count()
+    {
+      do_build(preorder |> Enum.take(num_in_fst), fst_inorder),
+      root,
+      do_build(preorder |> Enum.drop(num_in_fst), snd_inorder)
+    }
   end
 end
