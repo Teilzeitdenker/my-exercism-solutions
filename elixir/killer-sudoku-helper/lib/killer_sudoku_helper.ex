@@ -13,13 +13,7 @@ defmodule KillerSudokuHelper do
   defp do_combinations(%{exclude: take_only, size: size, sum: sum} = cage, candidates) do
     new_candidates =
       candidates
-      |> Enum.flat_map(fn [fst | _rest] = candidate ->
-        if fst == 9 do
-          []
-        else
-          for n <- take_only, n > fst, do: [n | candidate]
-        end
-      end)
+      |> Enum.flat_map(fn [fst | _rest] = candidate -> take_only |> Enum.filter(&(&1 > fst)) |> Enum.map(&[&1|candidate]) end)
       |> Enum.filter(&(Enum.sum(&1) <= sum))
     do_combinations(%{cage | size: size - 1}, new_candidates)
   end
