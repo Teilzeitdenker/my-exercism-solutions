@@ -21,13 +21,13 @@ defmodule Ledger do
       :nl_NL -> "Datum      | Omschrijving              | Verandering  "
     end
     # get rid of if - do - else by a better way of handling the newlines
-    entryLines =
+    entry_lines =
       entries # stable sorting to the rescue
       |> Enum.sort_by(& &1[:date])
       |> Enum.sort_by(& &1[:description])
       |> Enum.sort_by(& &1[:amount_in_cents])
       |> Enum.map(&format_entry(currency, locale, &1))
-    ([header | entryLines] |> Enum.join("\n")) <> "\n"
+    ([header | entry_lines] |> Enum.join("\n")) <> "\n"
   end
 
   # give every part its own format function
