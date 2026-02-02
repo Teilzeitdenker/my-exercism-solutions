@@ -1,6 +1,7 @@
 ﻿module TwoBucket
 
 type Bucket = One | Two
+type BucketResult = {Moves: int; GoalBucket: Bucket; OtherBucket: int}
 type Move = | FillOne | FillTwo | EmptyOne | EmptyTwo | PourRight | PourLeft
 let allMoves = [FillOne; FillTwo; EmptyOne; EmptyTwo; PourRight; PourLeft]
 
@@ -26,8 +27,8 @@ let measure sizeOne sizeTwo goal startBucket =
     let allReachableStates = List.unfold getNextStates ([initialState], [forbiddenState])
     let tryBucketResult (idx, ls) =  
         match (List.tryFind (fst >> (=) goal) ls, List.tryFind (snd >> (=) goal) ls) with 
-        | (Some (_, other), _) -> Some {| Moves = idx + 1; GoalBucket = Bucket.One; OtherBucket = other |}
-        | (_, Some (other, _)) -> Some {| Moves = idx + 1; GoalBucket = Bucket.Two; OtherBucket = other |}
+        | (Some (_, other), _) -> Some { Moves = idx + 1; GoalBucket = Bucket.One; OtherBucket = other }
+        | (_, Some (other, _)) -> Some { Moves = idx + 1; GoalBucket = Bucket.Two; OtherBucket = other }
         | _                    -> None
     allReachableStates
     |> List.indexed 
