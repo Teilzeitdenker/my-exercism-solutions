@@ -18,9 +18,9 @@ pub fn translate(input: &str) -> String {
         if RULE_1.is_match(input) {
             input.to_string() + "ay"
         } else if RULE_3.is_match(input) {
-            RULE_3.replace_all(input, "$rest$cluster").to_string() + "ay"
+            RULE_3.replace(input, "$rest$cluster").to_string() + "ay"
         } else if RULE24.is_match(input) {
-            RULE24.replace_all(input, "$rest$cluster").to_string() + "ay"
+            RULE24.replace(input, "$rest$cluster").to_string() + "ay"
         }  else {
             input.to_string()
         }
