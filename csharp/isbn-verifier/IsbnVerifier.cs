@@ -10,13 +10,9 @@ public static class IsbnVerifier
     {
         if (!VALID_ISBN.IsMatch(number)) return false;
         return number
-                .Where(c => char.IsDigit(c) || c == 'X')
-                .Reverse()
-                .Zip(Enumerable.Range(1, 10))
-                .Aggregate(
-                    0, (acc, tuple) => 
-                       acc + ( tuple.First == 'X' ? 10 : (int) char.GetNumericValue(tuple.First) ) * tuple.Second
-                    ) 
+                .Where(char.IsLetterOrDigit)
+                .Select( (c, i) => (c == 'X' ? 10 : (int) char.GetNumericValue(c)) * (10 - i))
+                .Sum()
                 % 11 == 0;
     }
 }
