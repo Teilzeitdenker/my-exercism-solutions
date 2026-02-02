@@ -74,8 +74,8 @@ public static class Ledger
             };
         }
         // use property initialization to set a default value
-        public LocaleType LocType { get; } = LocaleType.US;
-        public CultureInfo Culture { get; } = CultureInfo.InvariantCulture;
+        public LocaleType LocType { get; }
+        public CultureInfo Culture { get; }
     }
     
     // locale-dependent header
@@ -87,15 +87,30 @@ public static class Ledger
 
     // formatting constants and functions almost unchanged
     private const string Separator = " | ";
-    private static string FormatDate(IFormatProvider Culture, DateTime date) => date.ToString("d", Culture);
-    private static string FormatDescription(string desc) => (desc.Length > 25) ? $"{desc.Substring(0, 22)}..." : desc.PadRight(25);
+    private const int DateWidth = 10;
+    private const int DescriptionWidth = 25;
+    private const string TruncateSuffix = "...";
+    private const int ChangeWidth = 13;
+
+    private static string FormatDate(IFormatProvider Culture, DateTime date) => 
+        date.ToString("d", Culture).PadRight(DateWidth);
+
+    private static string FormatDescription(string desc) => 
+        (desc.Length > DescriptionWidth) ? 
+            $"{desc.Substring(0, DescriptionWidth - TruncateSuffix.Length)}{TruncateSuffix}" : 
+            desc.PadRight(DescriptionWidth);
+
     private static string FormatChange(IFormatProvider Culture, decimal cgh) =>
-        (cgh < 0.0m ? cgh.ToString("C", Culture) : $"{cgh.ToString("C", Culture)} ").PadLeft(13);
-    private static string FormatEntry(IFormatProvider Culture, LedgerEntry entry) =>
+        (cgh < 0.0m ? 
+            cgh.ToString("C", Culture) : 
+            $"{cgh.ToString("C", Culture)} " // one space more at the end
+        ).PadLeft(ChangeWidth);
+
+    private static string FormatEntry(IFormatProvider Culture, LedgerEntry entry) => // use string interpolation instead of concatenation
         $"{FormatDate(Culture, entry.Date)}{Separator}{FormatDescription(entry.Desc)}{Separator}{FormatChange(Culture, entry.Chg)}";
     
     // sorting function looks really better this way!
-    private static IEnumerable<LedgerEntry> sort(LedgerEntry[] entries) =>
+    private static IEnumerable<LedgerEntry> SortEntries(LedgerEntry[] entries) =>
         entries.OrderBy(e => e.Date).ThenBy(e => e.Desc).ThenBy(e => e.Chg);
 
     // decisive public method with LinQ
@@ -103,7 +118,7 @@ public static class Ledger
     {
         Locale locale = new Locale(localeString, currencyString);
         return string.Join("\n", 
-            sort(entries)
+            SortEntries(entries)
             .Select(entry => FormatEntry(locale.Culture, entry))
             .Prepend(Header(locale.LocType))
         );
