@@ -169,3 +169,229 @@ defmodule Math.Wheel.Struct do
   end
 
 end
+
+
+defmodule PairingHeap do
+
+  if Application.get_env(:priority_queue, :native) do
+    @compile :native
+    @compile {:hipe, [:o3]}
+  end
+
+    @type key :: any
+    @type value :: any
+
+    @type t :: {key, value, list} | nil
+    @type element :: {key, value}
+
+    @spec delete_min(t) :: t
+    def delete_min(nil), do: nil
+    def delete_min({_key, _v, sub_heaps}) do
+      pair(sub_heaps)
+    end
+
+    @spec empty?(t) :: boolean
+    def empty?(nil), do: true
+    def empty?(_), do: false
+
+    @spec meld(t, t) :: t
+    def meld(nil, heap), do: heap
+    def meld(heap, nil), do: heap
+    def meld(l = {key_l, value_l, sub_l}, r = {key_r, value_r, sub_r}) do
+      cond do
+        key_l < key_r -> {key_l, value_l, [r | sub_l]}
+        true          -> {key_r, value_r, [l | sub_r]}
+      end
+    end
+
+    @spec merge(t, t) :: t
+    def merge(h1, h2), do: meld(h1, h2)
+
+    @spec min(t, element) :: element
+    def min(heap, default \\ {nil, nil})
+    def min(nil, default), do: default
+    def min({key, value, _}, _default), do: {key, value}
+
+    @spec new :: t
+    @spec new(key, value) :: t
+    def new(), do: nil
+    def new(key, value), do: {key, value, []}
+
+    @spec pair([t]) :: t
+    defp pair([]), do: nil
+    defp pair([h]), do: h
+    defp pair([h0, h1 | hs]), do: meld(meld(h0, h1), pair(hs))
+
+    @spec pop(t, element) :: {element, t}
+    def pop(heap, default \\ {nil, nil}) do
+      {__MODULE__.min(heap, default), delete_min(heap)}
+    end
+
+    @spec put(t, key, value) :: t
+    def put(heap, key, value) do
+      meld(heap, new(key, value))
+    end
+
+  end
+
+  defmodule PriorityQueue do
+
+    if Application.get_env(:priority_queue, :native) do
+      @compile :native
+      @compile {:hipe, [:o3]}
+    end
+
+
+      @type key :: any
+      @type value :: any
+      @type element :: {key, value}
+
+      @heap PairingHeap
+
+
+      @type t :: %__MODULE__{size: non_neg_integer, heap: term}
+      defstruct size: 0, heap: nil
+
+      @spec delete_min(t) :: t
+      def delete_min(pq = %__MODULE__{size: n, heap: heap}) do
+        case empty?(pq) do
+          true -> pq
+          _    -> %{pq | size: n - 1, heap: @heap.delete_min(heap)}
+        end
+      end
+
+      @spec delete_min!(t) :: t | no_return
+      def delete_min!(pq) do
+        case empty?(pq) do
+          true -> raise PriorityQueue.EmptyError
+          _    -> delete_min(pq)
+        end
+      end
+
+      @spec empty?(t) :: boolean
+      def empty?(%__MODULE__{size: 0, heap: nil}), do: true
+      def empty?(_), do: false
+
+      @spec merge(t, t) :: t
+      def merge(pq = %__MODULE__{size: m, heap: heap0}, %__MODULE__{size: n, heap: heap1}) do
+        %{pq | size: m + n, heap: @heap.meld(heap0, heap1)}
+      end
+
+      @spec min(t, element) :: element
+      def min(%__MODULE__{heap: heap}, default \\ {nil, nil}), do: @heap.min(heap, default)
+
+      @spec min!(t) :: element | no_return
+      def min!(pq) do
+        case empty?(pq) do
+          true -> raise PriorityQueue.EmptyError
+          _    -> __MODULE__.min(pq)
+        end
+      end
+
+      def new, do: %__MODULE__{}
+
+      @spec pop(t, element) :: {element, t}
+      def pop(pq = %__MODULE__{size: n, heap: heap}, default \\ {nil, nil}) do
+        case empty?(pq) do
+          true -> {default, pq}
+          _    -> {e, heap} = @heap.pop(heap, default)
+                  {e, %{pq | size: n - 1, heap: heap}}
+        end
+      end
+
+      @spec pop!(t) :: {element, t} | no_return
+      def pop!(pq) do
+        case empty?(pq) do
+          true -> raise PriorityQueue.EmptyError
+          _    -> pop(pq)
+        end
+      end
+
+      @spec put(t, {key, value}) :: t
+      @spec put(t, key, value | none) :: t
+      def put(pq = %__MODULE__{ size: n, heap: heap }, {key, value}) do
+        %{pq | size: n + 1, heap: @heap.put(heap, key, value)}
+      end
+      def put(pq = %__MODULE__{ size: n, heap: heap }, key, value \\ nil) do
+        %{pq | size: n + 1, heap: @heap.put(heap, key, value)}
+      end
+
+      @spec size(t) :: non_neg_integer
+      def size(%__MODULE__{size: n}), do: n
+
+      @spec to_list(t) :: list
+      def to_list(%__MODULE__{size: 0, heap: nil}), do: []
+      def to_list(pq) do
+        [__MODULE__.min(pq) | to_list(delete_min(pq))]
+      end
+
+      @spec keys(t) :: list
+      def keys(%__MODULE__{size: 0, heap: nil}), do: []
+      def keys(pq) do
+        {key, _value} = min(pq)
+        [key | keys(delete_min(pq))]
+      end
+
+      @spec values(t) :: list
+      def values(%__MODULE__{size: 0, heap: nil}), do: []
+      def values(pq) do
+        {_k, v} = min(pq)
+        [v | values(delete_min(pq))]
+      end
+
+    end
+
+
+    defimpl Collectable, for: PriorityQueue do
+
+      def empty(_pq) do
+        PriorityQueue.new
+      end
+
+      def into(original) do
+        {original, fn
+          pq, {:cont, {k, v}} -> PriorityQueue.put(pq, k, v)
+          pq, {:cont, {k}} -> PriorityQueue.put(pq, k, nil)
+          pq, {:cont, k} -> PriorityQueue.put(pq, k, nil)
+          pq, :done -> pq
+          _, :halt -> :ok
+        end}
+      end
+    end
+
+
+    defimpl Enumerable, for: PriorityQueue do
+
+      def reduce(_,   {:halt, acc}, _fun),    do: {:halted, acc}
+      def reduce(pq,  {:suspend, acc}, fun),  do: {:suspended, acc, &reduce(pq, &1, fun)}
+      def reduce(pq,  {:cont, acc}, fun)      do
+        cond do
+          PriorityQueue.empty?(pq) -> {:done, acc}
+          true                     -> {e, pq} = PriorityQueue.pop(pq);
+                                      reduce(pq, fun.(e, acc), fun)
+        end
+      end
+
+      def member?(pq, e = {k, _v}) do
+        if PriorityQueue.empty?(pq) do
+          {:ok, false}
+        else
+          {e_h = {k_h, _}, pq} = PriorityQueue.pop(pq)
+          cond do
+            k_h > k   -> {:ok, false}
+            e === e_h -> {:ok, true}
+            true      -> member?(pq, e)
+          end
+        end
+      end
+
+      def count(pq), do: {:ok, PriorityQueue.size(pq)}
+    end
+
+    defmodule PriorityQueue.EmptyError do
+      defexception []
+
+      def message(_) do
+        "queue empty error"
+      end
+    end
