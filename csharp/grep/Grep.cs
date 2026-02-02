@@ -6,43 +6,16 @@ public static class Grep
 {
     static string Format(bool use_filename, bool use_line_number, string filename, int line_number, string val)
     {
-        string file = null;
-        if (use_filename)
-        {
-            file = filename + ':';
-        } else
-        {
-            file = string.Empty;
-        }
-        string num = null;
-        if (use_line_number)
-        {
-            num = line_number.ToString() + ':';
-        } else
-        {
-            num = string.Empty;
-        }
+        string file = use_filename ? filename + ':' : string.Empty;
+        string num = use_line_number ? line_number.ToString() + ':' : string.Empty;
         return $"{file}{num}{val}\n";
     }
     public static string Match(string pattern, string flags, string[] files)
     {
         string result = string.Empty;
-        string pattern_str = null;
-        if (flags.Contains("-x"))
-        {
-            pattern_str = $"^{pattern}$";
-        } else
-        {
-            pattern_str = pattern;
-        }
-        Regex rgx = null;
-        if (flags.Contains("-i"))
-        {
-            rgx = new Regex(pattern_str, RegexOptions.IgnoreCase | RegexOptions.Compiled);
-        } else
-        {
-            rgx = new Regex(pattern_str, RegexOptions.Compiled);
-        }
+        string pattern_str = flags.Contains("-x") ? $"^{pattern}$" : pattern;
+        RegexOptions options = flags.Contains("-i") ? RegexOptions.IgnoreCase : RegexOptions.None;
+        Regex rgx = new Regex(pattern_str, options);
         foreach (string file in files)
         {
             using (StreamReader sreader = File.OpenText(file))
