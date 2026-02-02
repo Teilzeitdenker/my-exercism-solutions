@@ -9,15 +9,19 @@ defmodule Frequency do
   @spec frequency([String.t()], pos_integer) :: map
   def frequency(texts, workers) do
     texts
-    |> Task.async_stream(&one_frequency/1, max_concurrency: workers)
-    |> Enum.reduce(%{}, fn {:ok, m1}, acc -> Map.merge(m1, acc, fn _k, v1, v2 -> v1 + v2 end) end)
+    |> Task.async_stream(&one_text_frequency/1, max_concurrency: workers)
+    |> Enum.reduce(%{}, fn {:ok, map}, acc ->
+        Map.merge(map, acc, fn _k, v1, v2 ->
+          v1 + v2
+        end)
+      end)
   end
 
-  def one_frequency(text) do
+  def one_text_frequency(text) do
     text
-    |> String.replace(~r/[\d | \s | [:punct:]]/, "")
     |> String.downcase
     |> String.graphemes
+    |> Enum.filter(&String.match?(&1, ~r/\p{L}/)) # keep only unicode letters
     |> Enum.frequencies
   end
 end
