@@ -1,4 +1,4 @@
-use Bitwise
+import Bitwise
 defmodule EliudsEggs do
   @doc """
   Given the number, count the number of eggs.
