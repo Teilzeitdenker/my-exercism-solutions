@@ -1,38 +1,39 @@
 use std::fmt::{Display, Formatter, Result};
-
 pub struct Roman(u32);
+
+const ROMAN_LETTERS: [(&'static str, &'static str); 4] = [("I", "V"), ("X", "L"), ("C", "D"), ("M", "?")];
+
+fn format_digit(f: &mut Formatter, digit: u32, pos: usize) -> Result {
+    assert!(digit < 10);
+    let (a, b) = ROMAN_LETTERS[pos];
+    match digit {
+        n if n < 4 => write!(f, "{}", str::repeat(a, n as usize)),
+        4               => write!(f, "{a}{b}"),
+        r if r < 9 => write!(f, "{b}{}", str::repeat(a, r as usize - 5)),
+        9               => write!(f, "{a}{}", ROMAN_LETTERS[pos + 1].0),
+        _               => unreachable!(),
+    }
+}
 
 impl Display for Roman {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        let roman_letters:Vec<(&str, &str)> = vec![("I", "V"), ("X", "L"), ("C", "D"), ("M", "?")];
-        
-        let mut digits: Vec<u32> = vec![];
-        let mut value = self.0;
+        let mut digits_reverse: Vec<u32> = vec![]; 
+        let mut num = self.0;
         loop {
-            digits.push(value % 10);
-            value /= 10;
-            if value == 0 { break; }
+            digits_reverse.push(num % 10);
+            num /= 10;
+            if num == 0 { break; }
         }
-        let res = digits
+        digits_reverse
             .iter()
             .enumerate()
-            .map(|(ind, &digit)| {
-                    let (a, b) = roman_letters[ind];
-                    match digit {
-                        n if n < 4 => str::repeat(a, n as usize),
-                        4 => a.to_string() + b,
-                        r if r < 9 => b.to_string() + str::repeat(a, r as usize - 5).as_str(),
-                        9 => a.to_string() + roman_letters[ind + 1].0,
-                        _ => panic!("Not a digit!"),
-                    }
-                })
-            .rfold("".to_string(), |acc, el| acc + &el);
-        write!(f, "{}", res)
+            .rfold(Ok(()), |acc, (pos, &digit)| {format_digit(f, digit, pos)?; acc})
     }
 }
 
 impl From<u32> for Roman {
     fn from(num: u32) -> Self {
-        Roman(num)
+        if num >= 4000 {panic!("The number {} is too big to be converted into a roman numeral", num)}
+        Self(num)
     }
 }
