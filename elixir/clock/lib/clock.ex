@@ -1,14 +1,17 @@
-import Kernel, except: [to_string: 1]
+# import Kernel, except: [to_string: 1]
 
 defmodule Clock do
-  defstruct hour: 0, minute: 0
+  defstruct minute: 0
 
   @type t :: %__MODULE__{}
   @day 1440
 
   defimpl String.Chars do
-    def to_string(%Clock{hour: _hour, minute: minute}) do
-      Time.new!(div(minute, 60), rem(minute, 60), 0) |> Kernel.to_string() |> to_charlist() |> Enum.take(5) |> Kernel.to_string()
+    defp pad_with_zeros(n) do
+      Kernel.to_string(n) |> String.pad_leading(2, "0")
+    end
+    def to_string(%Clock{minute: minute}) do
+      "#{pad_with_zeros(div(minute, 60))}:#{pad_with_zeros(rem(minute, 60))}"
     end
   end
 
@@ -20,8 +23,8 @@ defmodule Clock do
   """
   @spec new(integer, integer) :: t()
   def new(hour, minute) do
-    raw = hour * 60 + minute
-    %Clock{hour: 0, minute: modulo(raw, @day)}
+    minutes = hour * 60 + minute
+    %Clock{minute: Integer.mod(minutes, @day)}
   end
 
   @doc """
@@ -31,12 +34,11 @@ defmodule Clock do
       "10:03"
   """
   @spec add(t(), integer) :: t()
-  def add(%Clock{hour: hour, minute: minute}, add_minute) do
-    raw = hour * 60 + minute
-    %Clock{hour: 0, minute: modulo(raw + add_minute, @day)}
+  def add(%Clock{minute: minute}, add_minute) do
+    %Clock{minute: Integer.mod(minute + add_minute, @day)}
   end
-
-  defp modulo(a, b) do
-    rem(rem(a, b) + b, b)
-  end
+  # use Integer.mod() instead, this is the real modulo function and not the remainder
+  # defp modulo(a, b) do
+  #   rem(rem(a, b) + b, b)
+  # end
 end
