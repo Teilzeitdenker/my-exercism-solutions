@@ -19,68 +19,32 @@ public class BinTree
 }
 
 public class Zipper
-{   
-    public Zipper(IEnumerable<(BinTree, bool)> parents, BinTree focus)
-    {
-        Parents = parents;
-        Focus = focus;
-    }
+{
+    public Zipper(IEnumerable<(BinTree, bool)> parents, BinTree focus) => (Parents, Focus) = (parents, focus);
     public IEnumerable<(BinTree, bool)> Parents { get; }
     public BinTree Focus { get; }
-    public int Value()
-    {
-        return Focus.Value;
-    }
-
-    public Zipper SetValue(int newValue)
-    {
-        return FromTree(new BinTree(newValue, Focus.Left, Focus.Right), Parents);
-    }
-
-    public Zipper SetLeft(BinTree binTree)
-    {
-        return FromTree(new BinTree(Focus.Value, binTree, Focus.Right), Parents);
-    }
-
-    public Zipper SetRight(BinTree binTree) 
-    {
-        return FromTree(new BinTree(Focus.Value, Focus.Left, binTree), Parents);
-    }
-
-    public Zipper Left()
-    {
-        return Focus.Left != null ? FromTree(Focus.Left, Parents.Prepend((Focus, true))) : null;
-    }
-
-    public Zipper Right()
-    {
-        return Focus.Right != null ? FromTree(Focus.Right, Parents.Prepend((Focus, false))) : null;
-    }
-
+    public int Value() => Focus.Value;
+    public Zipper SetValue(int newValue) => FromTree(new BinTree(newValue, Focus.Left, Focus.Right), Parents);
+    public Zipper SetLeft(BinTree binTree) => FromTree(new BinTree(Focus.Value, binTree, Focus.Right), Parents);
+    public Zipper SetRight(BinTree binTree) => FromTree(new BinTree(Focus.Value, Focus.Left, binTree), Parents);
+    public Zipper Left() => Focus.Left != null ? FromTree(Focus.Left, Parents.Prepend((Focus, true))) : null;
+    public Zipper Right() => Focus.Right != null ? FromTree(Focus.Right, Parents.Prepend((Focus, false))) : null;
     public Zipper Up()
     {
         if (!Parents.Any()) return null;
-        var (tree, isLeft) = Parents.First();
-        var rest = Parents.Skip(1);
+        var ((tree, isLeft), rest) = (Parents.First(), Parents.Skip(1));
         var newFocus = new BinTree(tree.Value, isLeft ? Focus : tree.Left, isLeft ? tree.Right : Focus);
         return FromTree(newFocus, rest);
     }
-
     public BinTree ToTree()
     {
-        if (Parents.Count() == 0) return Focus;
+        if (!Parents.Any()) return Focus;
         Zipper actual = this;
-        while (actual.Parents.Count() > 0)
-        {
+        while (actual.Parents.Any())
             actual = actual.Up();
-        }
         return actual.Focus;
     }
-
-    public static Zipper FromTree(BinTree tree, IEnumerable<(BinTree, bool)> parents = null)
-    {
-        return new Zipper(parents ?? Enumerable.Empty<(BinTree, bool)>(), tree);
-    }
+    public static Zipper FromTree(BinTree tree, IEnumerable<(BinTree, bool)> parents = null) => new Zipper(parents ?? Enumerable.Empty<(BinTree, bool)>(), tree);
     public override bool Equals(object obj) => (obj as Zipper).Focus.Equals(this.Focus);
     public override int GetHashCode() => base.GetHashCode();
 }
