@@ -4,11 +4,10 @@ using System.Linq;
 
 public class RailFenceCipher
 {
-    public int Rails { get; init; }
-    public RailFenceCipher(int rails) => Rails = rails;
+    public RailFenceCipher(int rails) => _rails = rails;
     public string Encode(string input)
     {
-        return String.Join("", UpAndDown()
+        return string.Join("", UpAndDown()
             .Zip(input)
             .GroupBy(t => t.First, t => t.Second)
             .Select(c => string.Join("", c)));
@@ -17,24 +16,14 @@ public class RailFenceCipher
     {
         return string.Join("", UpAndDown()
             .Zip(Enumerable.Range(0, input.Length))
-            .OrderBy(t => t.First)
-            .Select(t => t.Second)
+            .OrderBy(t => t.First).Select(t => t.Second)
             .Zip(input)
-            .OrderBy(t => t.First)
-            .Select(t => t.Second));
+            .OrderBy(t => t.First).Select(t => t.Second));
     }
-    public IEnumerable<int> UpAndDown()
+    private IEnumerable<int> UpAndDown()
     {
-        while (true)
-        {
-            for (int i = 1; i < Rails; i++)
-            {
-                yield return i;
-            }
-            for (int i = Rails; i > 1; i--)
-            {
-                yield return i;
-            }
-        }
-    } 
+        while (true) { for (int i = 1; i < _rails; i++) { yield return i;}
+                       for (int i = _rails; i > 1; i--) { yield return i;} }
+    }
+    private readonly int _rails;
 }
