@@ -9,7 +9,6 @@
   <ItemGroup>
     <Compile Include="Hangman.fs" />
     <Compile Include="HangmanTests.fs" />
-	<Content Include="README.md" />
   </ItemGroup>
 
   <ItemGroup>

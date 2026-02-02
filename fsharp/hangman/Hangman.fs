@@ -7,7 +7,7 @@ open System.Reactive.Subjects
 
 type Progress = Busy of int | Win | Lose 
 type HangmanState = { progress: Progress; maskedWord: string }
-type HangmanSubject(subject: BehaviorSubject<HangmanState>) = // wrapper around BehaviorSubject ...
+type HangmanSubject(subject: BehaviorSubject<HangmanState>) = // wrapper around a Subject
     member _.Add    = subject.Subscribe // ... to make the tests possible which use .Add()
     member _.Value  = subject.Value  
     member _.AsObs  = subject.AsObservable 
