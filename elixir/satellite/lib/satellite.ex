@@ -10,12 +10,9 @@ defmodule Satellite do
   @spec build_tree(preorder :: [any], inorder :: [any]) :: {:ok, tree} | {:error, String.t()}
   def build_tree(preorder, inorder) do
     cond do
-      preorder |> Enum.count() != inorder |> Enum.count() ->
-        {:error, "traversals must have the same length"}
-      preorder |> Enum.sort()  != inorder |> Enum.sort() ->
-        {:error, "traversals must have the same elements"}
-      preorder |> Enum.uniq() |> Enum.count() != preorder |> Enum.count() or preorder |> Enum.uniq() |> Enum.count() != preorder |> Enum.count() ->
-        {:error, "traversals must contain unique items"}
+      preorder |> Enum.count() != inorder |> Enum.count() -> {:error, "traversals must have the same length"}
+      preorder |> Enum.sort()  != inorder |> Enum.sort() ->  {:error, "traversals must have the same elements"}
+      preorder |> Enum.uniq() != preorder or preorder |> Enum.uniq() != preorder -> {:error, "traversals must contain unique items"}
       true -> {:ok, do_build(preorder, inorder)}
     end
   end
@@ -25,11 +22,7 @@ defmodule Satellite do
   defp do_build([a], [b]) when a == b, do: {{}, a, {}}
   defp do_build([root | preorder], inorder) do
     {fst_inorder, [_root | snd_inorder]} = inorder |> Enum.split_while(&(&1 != root))
-    num_in_fst = fst_inorder |> Enum.count()
-    {
-      do_build(preorder |> Enum.take(num_in_fst), fst_inorder),
-      root,
-      do_build(preorder |> Enum.drop(num_in_fst), snd_inorder)
-    }
+    {fst_preorder, snd_preorder} = preorder |> Enum.split(fst_inorder |> Enum.count)
+    {do_build(fst_preorder, fst_inorder), root, do_build(snd_preorder, snd_inorder)}
   end
 end
