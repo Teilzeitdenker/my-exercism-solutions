@@ -20,7 +20,7 @@ module BirthPlaceAndDate =
     let onMonth_ = (fun b -> b.on.Month), (fun m b -> { b with on = new DateTime(b.on.Year, m, b.on.Day) })
 type Person = { name: Name; born: BirthPlaceAndDate; address: Address }
 module Person = 
-    let name_ = (fun p -> p.name), (fun n p -> { p with name = n })
+    let name_ = (fun p -> p.name), (fun n (p : Person) -> { p with name = n })
     let born_ = (fun p -> p.born), (fun b p -> { p with born = b })
     let address_ = (fun p -> p.address), (fun a p -> { p with address = a })
 
