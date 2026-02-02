@@ -3,7 +3,7 @@ defmodule GoCounting do
   @type owner :: %{owner: atom, territory: [position]}
   @type territories :: %{white: [position], black: [position], none: [position]}
   @offsets [{0, 1}, {0, -1}, {1, 0}, {-1, 0}]
-  
+
   @doc """
   Return the owner and territory around a position
   """
@@ -15,8 +15,7 @@ defmodule GoCounting do
       not_on_board?(b, x, y) -> {:error, "Invalid coordinate"}
       entry(b, x, y) != ?_   -> {:ok, %{owner: :none, territory: []}}
       true                   -> {entries, coords} = territory(b, x, y, [])
-        owner = case Enum.uniq(entries), do:
-          ([?B] -> :black; [?W] -> :white; _ -> :none)
+        owner = case Enum.uniq(entries), do: ([?B]->:black; [?W]->:white; _->:none)
         {:ok, %{owner: owner, territory: Enum.sort(Enum.uniq(coords))}}
     end
   end
@@ -27,7 +26,7 @@ defmodule GoCounting do
   @spec territories(board :: String.t()) :: territories
   def territories(board) do
     b = board |> String.split("\n", trim: true)
-    for y <- 0..(length(b)-1), x <- 0..(String.length(hd(b))-1) do
+    for y <- 0 .. (length(b)  -1), x <- 0 .. (String.length(hd(b)) - 1) do
        territory(board, {x, y}) |> elem(1)
     end
     |> Enum.group_by(&(&1.owner), &(&1.territory))
