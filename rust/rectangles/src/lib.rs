@@ -1,22 +1,13 @@
+use itertools::Itertools;
 pub fn count(lines: &[&str]) -> u32 {
     if lines.len() == 0 || lines.iter().all(|&line| !line.contains('+')) { return 0; }
+    // just to be sure, using an .unwrap() below, so lines have to be ascii...
+    assert!(lines.iter().all(|line| line.len() == lines[0].len() && line.is_ascii()));
     // a data structure that collects all column index pairs of '+' (the corner_pairs of possible rectangles) line by line
     let corner_pairs: Vec<Vec<(usize, usize)>> = 
         lines.iter().map(|&line| {
             let indices = line.char_indices().filter_map(|(i, c)| if c == '+' {Some(i)} else {None}).collect::<Vec<_>>();
-            match indices.len() {
-                0 => Vec::new(),
-                1 => Vec::new(),
-                _ => { // this part could possibly be done with the .combinations(2) function in the itertools crate
-                    let mut pairs = Vec::with_capacity( (indices.len() * (indices.len() - 1)) / 2);
-                    for i in 0..(indices.len() - 1) {
-                        for j in (i + 1)..indices.len() {
-                            pairs.push((indices[i], indices[j]));
-                        }
-                    }
-                    pairs
-                }
-            }
+            indices.iter().combinations(2).map(|comb| (*comb[0], *comb[1])).collect()
         }).collect();
     let horizontal = ['+', '-'];
     let vertical = ['+', '|'];
