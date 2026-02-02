@@ -38,15 +38,18 @@ defmodule ListOps do
   def foldr(l, acc, f), do: foldl(reverse(l), acc, f)
 
   @spec append(list, list) :: list
-  def append(a, b), do: reverse(append_rev(reverse(a), b))
+  def append([], b), do: b
+  def append([h|t], b), do: [h|append(t, b)]
+  # def append(a, b), do: reverse(append_rev(reverse(a), b))
 
-  defp append_rev(a, []), do: a
-  defp append_rev(a, [h|t]), do: append_rev([h|a], t)
+  # defp append_rev(a, []), do: a
+  # defp append_rev(a, [h|t]), do: append_rev([h|a], t)
 
   @spec concat([[any]]) :: [any]
   def concat([]), do: []
-  def concat(ll), do: concat_acc([], ll)
+  def concat([h|t]), do: append(h, concat(t))
+  # def concat(ll), do: concat_acc([], ll)
 
-  defp concat_acc(acc, []), do: reverse(acc)
-  defp concat_acc(acc, [h|t]), do: concat_acc(append_rev(acc, h), t)
+  # defp concat_acc(acc, []), do: reverse(acc)
+  # defp concat_acc(acc, [h|t]), do: concat_acc(append_rev(acc, h), t)
 end
