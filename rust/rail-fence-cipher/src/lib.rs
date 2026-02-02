@@ -6,42 +6,37 @@ impl RailFence {
     }
 
     pub fn encode(&self, text: &str) -> String {
-        let rails = self.0;
-        let height_char_iterator = (1..rails)
-            .chain((2..=rails).rev())
-            .cycle()
-            .take(text.len())
-            .zip(text.chars());
-        
-        (1..=rails)
-            .map(|n| {
-                height_char_iterator
-                    .clone()
-                    .filter_map(|(s, c)| if s == n {Some(c)} else {None})
-                    .collect::<String>()
-            })
-            .collect::<Vec<_>>()
-            .join("")
+        let rails = self.0 as usize;
+        let char_height_iterator = text.chars().zip(RailFence::up_and_down(rails));
+        let mut vecs_on_rails = vec![Vec::new(); rails];
+        for (c, h) in char_height_iterator {
+            vecs_on_rails[h].push(c);
+        }
+        vecs_on_rails.iter().flatten().collect()
     }
 
     pub fn decode(&self, cipher: &str) -> String {
-        let rails = self.0;
-        
-        let place_height_iterator = (1..rails)
-            .chain((2..=rails).rev())
-            .cycle()
+        let mut sorted_by_rails_for_zipping = RailFence::up_and_down(self.0 as usize)
             .take(cipher.len())
-            .enumerate();
+            .zip(1..)
+            .collect::<Vec<_>>();
+        sorted_by_rails_for_zipping.sort();
         
-        let mut sorted_for_zipping = place_height_iterator.collect::<Vec<_>>();
-        sorted_for_zipping.sort_by_key(|(_, f)| *f);
+        let mut stringpos_char = sorted_by_rails_for_zipping.iter()
+            .zip(cipher.chars())
+            .map(|((_,p),c)| (p, c))
+            .collect::<Vec<_>>();
+        stringpos_char.sort();
         
-        let mut pos_height_char = sorted_for_zipping.iter().zip(cipher.chars()).collect::<Vec<_>>();
-        pos_height_char.sort_by_key(|((p, _), _)| *p);
-        
-        pos_height_char
+        stringpos_char
             .iter()
             .map(|(_,c)| c)
             .collect()
+    }
+
+    fn up_and_down(rails: usize) -> impl Iterator<Item = usize> {
+        (0..rails - 1)
+            .chain((1..rails).rev())
+            .cycle()
     }
 }
