@@ -5,22 +5,18 @@ using System.Linq;
 
 public class SimpleLinkedList<T> : IEnumerable<T>
 {
-    //Properties
-    private List<T> list = new List<T>();
-    public int Count
+    // Node class
+    private class Node
     {
-        get
-        {
-            return list.Count();
-        }
-        private set { }
+        public T Data { get; init; }
+        public Node Next { get; set; }  
     }
+    // Properties
+    private Node head = null;
+    public int Count { get; private set; } = 0;
     // Constructors
     public SimpleLinkedList() { }
-    public SimpleLinkedList(T value)
-    {
-        Push(value);
-    }
+    public SimpleLinkedList(T value) => Push(value);
     public SimpleLinkedList(IEnumerable<T> values)
     {
         foreach (T value in values) { Push(value); }
@@ -28,25 +24,33 @@ public class SimpleLinkedList<T> : IEnumerable<T>
     // Methods
     public void Push(T value)
     {
-        list.Add(value);
+        Node node = new Node { Data = value };
+        node.Next = head;
+        head = node;
+        Count++;
     }
     public T Pop()
     {
-        if (list.Count == 0) { throw new Exception("empty list");  }
-        T last = list[list.Count - 1];
-        list.RemoveAt(list.Count - 1);
-        return last;
+        if (Count == 0) { throw new Exception("empty list");  }
+        T ret = head.Data;
+        head = head.Next;
+        Count--;
+        return ret;
     }
     public void Reverse()
     {
-        list.Reverse();
+        T[] values = new T[Count];
+        for (int i = 1; i <= Count; i++) { values[Count - i] = Pop(); }
+        foreach (T value in values) { Push(value); }
     }
     // Interface implementation
     public IEnumerator<T> GetEnumerator()
     {
-        for (int i = list.Count - 1; i >= 0; i--)
+        Node hd = head;
+        while (hd != null)
         {
-            yield return list[i];
+            yield return hd.Data;
+            hd = hd.Next;
         }
     } 
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
