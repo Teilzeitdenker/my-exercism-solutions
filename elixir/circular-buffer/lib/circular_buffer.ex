@@ -8,7 +8,7 @@ defmodule CircularBuffer do
   """
   @spec new(capacity :: integer) :: {:ok, pid}
   def new(capacity) do
-    Agent.start_link(fn -> %{items: [], capacity: capacity} end)
+    Agent.start(fn -> {capacity, []} end)
   end
 
   @doc """
@@ -16,13 +16,10 @@ defmodule CircularBuffer do
   """
   @spec read(buffer :: pid) :: {:ok, any} | {:error, atom}
   def read(buffer) do
-    case Agent.get(buffer, &Map.get(&1, :items)) do
-      [] ->
-        {:error, :empty}
-      [el | rest] ->
-        Agent.update(buffer, &Map.put(&1, :items, rest))
-        {:ok, el}
-    end
+    Agent.get_and_update(buffer, fn
+      {_, []} = state -> {{:error, :empty}, state}
+      {c, [el | rest]} -> {{:ok, el}, {c, rest}}
+    end)
   end
 
   @doc """
@@ -30,15 +27,9 @@ defmodule CircularBuffer do
   """
   @spec write(buffer :: pid, item :: any) :: :ok | {:error, atom}
   def write(buffer, item) do
-    capacity = Agent.get(buffer, &Map.get(&1, :capacity))
-    items = Agent.get(buffer, &Map.get(&1, :items))
-    case items |> Enum.count() do
-      ^capacity ->
-        {:error, :full}
-      _ ->
-        Agent.update(buffer, &Map.put(&1, :items, items ++ [item]))
-        :ok
-    end
+    Agent.get_and_update(buffer, fn {c, items} = state ->
+      if Enum.count(items) < c, do: {:ok, {c, items ++ [item]}}, else: {{:error, :full}, state}
+    end)
   end
 
   @doc """
@@ -46,17 +37,9 @@ defmodule CircularBuffer do
   """
   @spec overwrite(buffer :: pid, item :: any) :: :ok
   def overwrite(buffer, item) do
-    capacity = Agent.get(buffer, &Map.get(&1, :capacity))
-    items = Agent.get(buffer, &Map.get(&1, :items))
-    case items |> Enum.count() do
-      ^capacity ->
-        [_h | t] = items
-        Agent.update(buffer, &Map.put(&1, :items, t ++ [item]))
-        :ok
-      _ ->
-        Agent.update(buffer, &Map.put(&1, :items, items ++ [item]))
-        :ok
-    end
+    Agent.get_and_update(buffer, fn {c, items} ->
+      if Enum.count(items) < c, do: {:ok, {c, items ++ [item]}}, else: ([_|tail] = items; {:ok, {c, tail ++ [item]}})
+    end)
   end
 
   @doc """
@@ -64,7 +47,6 @@ defmodule CircularBuffer do
   """
   @spec clear(buffer :: pid) :: :ok
   def clear(buffer) do
-    Agent.update(buffer, &Map.put(&1, :items, []))
-    :ok
+    Agent.update(buffer, fn {c, _} -> {c, []} end)
   end
 end
