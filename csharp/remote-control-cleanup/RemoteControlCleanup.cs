@@ -1,41 +1,57 @@
 public class RemoteControlCar
 {
     public string CurrentSponsor { get; private set; }
-
     private Speed currentSpeed;
-
-    private Telemetry Telemetry { get; };
-
-    // TODO encapsulate the methods suffixed with "_Telemetry" in their own class
-    // dropping the suffix from the method name
-    private class Telemetry
+    // must be public, since it should be accessible by car.Telemetry
+    public ITelemetry Telemetry;
+    // design a public interface, s.t. the actual CarTelemetry class can be made private (not accessible from outside a RemoteControlCar object).
+    public interface ITelemetry
     {
+        public void Calibrate();
+        public bool SelfTest();
+        public void ShowSponsor(string name);
+        public void SetSpeed(decimal amount, string units);
 
     }
-    public void Calibrate_Telementry()
+    // the constructur of the RemoteControlCar gives itself as a paramater to the CarTelemetry contructor
+    public RemoteControlCar()
     {
-
+        Telemetry = new CarTelemetry(this);
     }
-
-    public bool SelfTest_Telemetry()
+    // implement the interface in the CarTelemetry class
+    private class CarTelemetry : ITelemetry
     {
-        return true;
-    }
-
-    public void ShowSponsor_Telemetry(string sponsorName)
-    {
-        SetSponsor(sponsorName);
-    }
-
-    public void SetSpeed_Telemetry(decimal amount, string unitsString)
-    {
-        SpeedUnits speedUnits = SpeedUnits.MetersPerSecond;
-        if (unitsString == "cps")
+        // in order to call the methods from the RemoteControlCar have to take a "parent" paramater
+        public RemoteControlCar _parent;
+        public CarTelemetry(RemoteControlCar c)
         {
-            speedUnits = SpeedUnits.CentimetersPerSecond;
+            _parent = c;
+        }
+        public void Calibrate()
+        {
+
         }
 
-        SetSpeed(new Speed(amount, speedUnits));
+        public bool SelfTest()
+        {
+            return true;
+        }
+
+        public void ShowSponsor(string sponsorName)
+        {
+            _parent.SetSponsor(sponsorName);
+        }
+
+        public void SetSpeed(decimal amount, string unitsString)
+        {
+            SpeedUnits speedUnits = SpeedUnits.MetersPerSecond;
+            if (unitsString == "cps")
+            {
+                speedUnits = SpeedUnits.CentimetersPerSecond;
+            }
+
+            _parent.SetSpeed(new Speed(amount, speedUnits));
+        }
     }
 
     public string GetSpeed()
@@ -53,33 +69,35 @@ public class RemoteControlCar
     {
         currentSpeed = speed;
     }
-}
-
-public enum SpeedUnits
-{
-    MetersPerSecond,
-    CentimetersPerSecond
-}
-
-public struct Speed
-{
-    public decimal Amount { get; }
-    public SpeedUnits SpeedUnits { get; }
-
-    public Speed(decimal amount, SpeedUnits speedUnits)
+    // take these into the class definition and make them private
+    private enum SpeedUnits
     {
-        Amount = amount;
-        SpeedUnits = speedUnits;
+        MetersPerSecond,
+        CentimetersPerSecond
     }
 
-    public override string ToString()
+    private struct Speed
     {
-        string unitsString = "meters per second";
-        if (SpeedUnits == SpeedUnits.CentimetersPerSecond)
+        public decimal Amount { get; }
+        public SpeedUnits SpeedUnits { get; }
+
+        public Speed(decimal amount, SpeedUnits speedUnits)
         {
-            unitsString = "centimeters per second";
+            Amount = amount;
+            SpeedUnits = speedUnits;
         }
 
-        return Amount + " " + unitsString;
+        public override string ToString()
+        {
+            string unitsString = "meters per second";
+            if (SpeedUnits == SpeedUnits.CentimetersPerSecond)
+            {
+                unitsString = "centimeters per second";
+            }
+
+            return Amount + " " + unitsString;
+        }
     }
 }
+
+
