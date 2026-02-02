@@ -25,6 +25,7 @@ defmodule React do
   defp get(%{compute_cells: coms} = cells, c_name) when is_map_key(coms, c_name) do
     apply(elem(coms[c_name], 1), Enum.map(elem(coms[c_name], 0), &get(cells, &1)))
   end
+
   @doc """
   Set the value of an input cell
   """
@@ -33,8 +34,8 @@ defmodule React do
     Agent.update(cells, fn cells ->
       next_cells = put_in(cells.input_cells[c_name], value)
       for {cb_name, {cell, cb}} <- next_cells.cbs do
-        new = get(next_cells, cell)
-        if get(cells, cell) != new, do: cb.(cb_name, new)
+        new_value = get(next_cells, cell)
+        if get(cells, cell) != new_value, do: cb.(cb_name, new_value)
       end
       next_cells
     end)
@@ -51,7 +52,7 @@ defmodule React do
   @doc """
   Remove a callback from an output cell
   """
-  @spec remove_callback(cells :: pid, c_name :: String.t(), callback_name :: String.t()) :: :ok
+  @spec remove_callback(cells :: pid, c_name :: String.t(), cb_name :: String.t()) :: :ok
   def remove_callback(cells, _c_name, cb_name) do
     Agent.update(cells, &elem(pop_in(&1.cbs[cb_name]), 1))
   end
