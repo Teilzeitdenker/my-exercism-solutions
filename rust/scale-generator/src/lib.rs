@@ -22,29 +22,19 @@ impl Scale {
                     'M' => vec![true, false],
                     'A' => vec![true, false, false],
                     _   => return Err(Error::InvalidIntervals(intervals.to_string())),
-                }
-            )
+                })
         }
         filter_pattern.push(true);  // don't forget the last tone
-        Ok(
-            Scale(
-                tones
-                    .iter()
-                    .cycle()
-                    .skip_while(|&c| *c.to_ascii_uppercase() != tonic.to_ascii_uppercase()) // use this trick to save a function that uppercases tonic
+        Ok(Scale(tones.iter()
+                    .cycle().skip_while(|&c| *c.to_ascii_uppercase() != tonic.to_ascii_uppercase()) // use this trick to save a function that uppercases tonic
                     .zip(filter_pattern.iter())
-                    .filter(|(_, &b)| b)
-                    .map(|(&t, _)| t.to_string())
-                    .collect()
-                )
-            )
+                    .filter_map(|(&t, &b)| if b {Some(t.to_string())} else {None}) 
+                    .collect()))
     }
-
     pub fn chromatic(tonic: &str) -> Result<Scale, Error> {
         let intervals = "m".repeat(12);
         Scale::new(tonic, &intervals)
     }
-
     pub fn enumerate(&self) -> Vec<String> {
         self.0.clone()
     }
