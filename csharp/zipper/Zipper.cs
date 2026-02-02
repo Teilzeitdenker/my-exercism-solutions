@@ -12,7 +12,7 @@ public class BinTree
     {
         if (obj is not BinTree b || b.Value != Value) return false;
         bool leftIsSame = (b.Left == null && Left == null) || (Left != null && Left.Equals(b.Left));
-        bool rightIsSame = (b.Right == null && Right == null) || (Right != null && Right.Equals(b.Left));
+        bool rightIsSame = (b.Right == null && Right == null) || (Right != null && Right.Equals(b.Right));
         return leftIsSame && rightIsSame;
     }
     public override int GetHashCode() => base.GetHashCode();
