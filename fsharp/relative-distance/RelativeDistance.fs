@@ -8,15 +8,15 @@ let buildGraph (familyTree : FamilyTree) : Graph =
         Map.change source (Option.defaultValue Set.empty >> Set.add target >> Some)
     
     familyTree
-    |> Map.fold (fun graph parent children -> // use a mutable graph variable to many edges at once
+    |> Map.fold (fun graph parent children -> // use mutable graph variable to add many edges
+        // otherwise would have to define more helper functions that use Map.fold 
         let mutable g = graph
         for child in children do
             g <- addEdge parent child g
             g <- addEdge child parent g
-        for c1 in children do // sibling connections
-            for c2 in children do
-                if c1 <> c2 then 
-                    g <- addEdge c1 c2 g
+            for sibling in children do
+                if child <> sibling then 
+                    g <- addEdge child sibling g
         g
     ) Map.empty
 
