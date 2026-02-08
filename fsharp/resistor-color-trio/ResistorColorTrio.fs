@@ -10,6 +10,8 @@ let value (colors : string list) =  ((colorCode colors[0]) * 10 + (colorCode col
 
 let label colors = 
     let value = value colors
-    if value % 1000000 = 0 then sprintf "%d megaohms" (value / 1000000)
+    if value = 0 then "0 ohms"
+    elif value % 1000000000 = 0 then sprintf "%d gigaohms" (value / 1000000000)
+    elif value % 1000000 = 0 then sprintf "%d megaohms" (value / 1000000)
     elif value % 1000 = 0 then sprintf "%d kiloohms" (value / 1000)
     else sprintf "%d ohms" value
