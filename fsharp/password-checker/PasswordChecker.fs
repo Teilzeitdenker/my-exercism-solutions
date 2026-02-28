@@ -25,7 +25,6 @@ let checkPassword (password: string) : Result<string, PasswordError> =
 
 let getStatusMessage (result: Result<string, PasswordError>) : string =
     match result with
-    | Ok _ -> "OK"
     | Error LessThan12Characters ->
         "Error: does not have at least 12 characters"
     | Error MissingUppercaseLetter ->
@@ -36,3 +35,4 @@ let getStatusMessage (result: Result<string, PasswordError>) : string =
         "Error: does not have at least one digit"
     | Error MissingSymbol ->
         "Error: does not have at least one symbol"
+    | Ok _ -> "OK"
