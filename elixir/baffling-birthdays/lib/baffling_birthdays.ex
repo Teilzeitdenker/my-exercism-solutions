@@ -14,8 +14,7 @@ defmodule BafflingBirthdays do
 
   @spec random_birthdates(group_size :: integer()) :: [Date.t()]
   def random_birthdates(group_size) do
-    (1..group_size) |> Enum.map(fn _ -> 
-    Date.add(~D[2025-01-01], :rand.uniform(365) - 1) end)
+    (1..group_size) |> Enum.map(&rand_date/0)
   end
 
   @spec estimated_probability_of_shared_birthday(group_size :: integer()) :: float()
@@ -24,4 +23,6 @@ defmodule BafflingBirthdays do
       shared_birthday?(random_birthdates(group_size)) end)
     cnt / @simulations * 100.0
   end
+
+  defp rand_date(), do: Date.add(~D[2025-01-01], :rand.uniform(365) - 1)
 end
