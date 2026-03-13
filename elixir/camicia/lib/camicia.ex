@@ -1,21 +1,5 @@
 defmodule Camicia do
-  @doc """
-    Simulate a card game between two players.
-    Each player has a deck of cards represented as a list of strings.
-    Returns a tuple with the result of the game:
-    - `{:finished, cards, tricks}` if the game finishes with a winner
-    - `{:loop, cards, tricks}` if the game enters a loop
-    `cards` is the number of cards played.
-    `tricks` is the number of central piles collected.
 
-    ## Examples
-
-      iex> Camicia.simulate(["2"], ["3"])
-      {:finished, 2, 1}
-
-      iex> Camicia.simulate(["J", "2", "3"], ["4", "J", "5"])
-      {:loop, 8, 3}
-  """
   @card_encodings %{"J" => 1, "Q" => 2, "K" => 3, "A" => 4}
 
   @spec simulate(list(String.t()), list(String.t())) ::
@@ -80,13 +64,11 @@ defmodule Camicia do
     next_player = -player
     case card do
       0 ->
-        if battle? do
-          play_cards(hand_a, hand_b, new_pile, player, new_turns, cards_to_play - 1, true)
-        else
-          play_cards(hand_a, hand_b, new_pile, next_player, new_turns, 1, false)
+        case battle? do
+          true -> play_cards(hand_a, hand_b, new_pile, player, new_turns, cards_to_play - 1, true)
+          _    -> play_cards(hand_a, hand_b, new_pile, next_player, new_turns, 1, false)
         end
-      value ->
-        play_cards(hand_a, hand_b, new_pile, next_player, new_turns, value, true)
+      value -> play_cards(hand_a, hand_b, new_pile, next_player, new_turns, value, true)
     end
   end
 
